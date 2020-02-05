@@ -25,7 +25,6 @@ import com.yuntian.sys.model.entity.Operator;
 import com.yuntian.sys.model.entity.Role;
 import com.yuntian.sys.model.vo.MenuTreeVO;
 import com.yuntian.sys.model.vo.OperatorVO;
-import com.yuntian.sys.service.MenuService;
 import com.yuntian.sys.service.OperatorRoleService;
 import com.yuntian.sys.service.OperatorService;
 import com.yuntian.sys.service.RoleMenuService;
@@ -60,9 +59,6 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
     @Resource
     private RedisManage redisManage;
 
-
-    @Resource
-    private MenuService menuService;
 
     @Resource
     private OperatorRoleService operatorRoleService;
