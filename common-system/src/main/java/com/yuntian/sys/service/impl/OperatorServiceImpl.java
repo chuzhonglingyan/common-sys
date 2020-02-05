@@ -157,12 +157,11 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
             redisManage.del(oldToken);
         }
         String token = TokenUtil.createToken(String.valueOf(operator.getId()));
-        OperatorVO operatorVO=BeanCopyUtil.copyProperties(operator,OperatorVO.class);
-        Objects.requireNonNull(operatorVO).setToken(token);
+        OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
         //缓存当前用户的token
         redisManage.set(useIdKey, token, RedisKey.ONE_DAY);
-        //缓存当前用户信息
-        redisManage.set(token, operator, RedisKey.ONE_DAY);
+        redisManage.set(token, operatorVO, RedisKey.ONE_DAY);
+        Objects.requireNonNull(operatorVO).setToken(token);
         return operatorVO;
     }
 
@@ -188,7 +187,7 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         if (!flag) {
             BusinessException.throwMessage("注册失败，请重新注册");
         }
-        Operator operator= getUserByAccount(dto.getAccount());
+        Operator operator = getUserByAccount(dto.getAccount());
         operator.setPassWord(null);
         return operator;
     }
@@ -203,17 +202,30 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
 
     @Override
     public OperatorVO getInfo(Long userId) {
-        Operator operator=getById(userId);
-        OperatorVO operatorVO= BeanCopyUtil.copyProperties(operator,OperatorVO.class);
-        Role role=operatorRoleService.getEnableRoleByOperatorId(userId);
-        Objects.requireNonNull(operatorVO).setRoles(role.getRoleKey());
+        Operator operator = getById(userId);
+        OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
+        List<Role> roleVoList = operatorRoleService.getEnableListByOperatorId(userId);
+        List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(Collectors.toList());
+        Objects.requireNonNull(operatorVO).setRoleList(roleKeyList);
         return operatorVO;
     }
 
+    @Override
+    public OperatorVO getInfo(String account) {
+        LambdaQueryWrapper<Operator> lambdaQueryWrapper = new QueryWrapper<Operator>().lambda()
+                .eq(Operator::getAccount, account);
+        Operator operator = getOne(lambdaQueryWrapper);
+        AssertUtil.isNotNull(operator, "该用户不存在");
+        OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
+        List<Role> roleVoList = operatorRoleService.getEnableListByOperatorId(operator.getId());
+        List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(Collectors.toList());
+        Objects.requireNonNull(operatorVO).setRoleList(roleKeyList);
+        return operatorVO;
+    }
 
     @Override
     public List<MenuTreeVO> getMenuTreeVoListByOperator(Long operatorId) {
-        List<Menu> menuList =getEnableMenuListByOperatorId(operatorId);
+        List<Menu> menuList = getEnableMenuListByOperatorId(operatorId);
         if (CollectionUtils.isEmpty(menuList)) {
             return new ArrayList<>();
         }

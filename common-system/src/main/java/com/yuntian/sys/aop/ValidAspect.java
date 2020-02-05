@@ -50,7 +50,7 @@ public class ValidAspect {
                 continue;
             }
             for (Annotation annotation : paramAnn) {
-                //这里判断当前注解是否为RuralValid.class
+                //这里判断当前注解是否为Valid.class
                 if (annotation.annotationType().equals(Valid.class)) {
                     //校验该参数，验证一次退出该注解
                     String msg = ValidationUtil.validator(param);

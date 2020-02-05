@@ -1,8 +1,11 @@
 package com.yuntian.sys.model.vo;
 
+import com.yuntian.sys.model.entity.Operator;
+
+import java.util.List;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.yuntian.sys.model.entity.Operator;
 
 /**
  * @Auther: yuntian
@@ -18,6 +21,8 @@ public class OperatorVO extends Operator {
      */
     private String token;
 
-    private String roles;
+    private List<String> roleList;
+
+    private List<String> permissionList;
 
 }

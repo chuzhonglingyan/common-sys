@@ -50,5 +50,7 @@ public interface OperatorService extends IBaseService<Operator> {
 
     OperatorVO getInfo(Long userId);
 
+    OperatorVO getInfo(String account);
+
     List<Menu> getEnableMenuListByOperatorId(Long operatorId);
 }

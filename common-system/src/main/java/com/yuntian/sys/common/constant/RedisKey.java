@@ -1,5 +1,7 @@
 package com.yuntian.sys.common.constant;
 
+import java.util.List;
+
 /**
  * @Auther: yuntian
  * @Date: 2018/8/21 23:57
@@ -10,6 +12,8 @@ public class RedisKey {
     private static final String BACKEND_PREFIX = "sys:";
 
     private static final String BACKEND_LOGIN_PREFIX = "sys:token:%s";
+
+    private static final String BACKEND_PERMISSION_PREFIX = "sys:permission:%s";
 
 
     private static final String TOKEN_PREFIX = "token_%s";
@@ -28,6 +32,10 @@ public class RedisKey {
 
     public static String getBackendTokenkey(String id) {
         return String.format(BACKEND_LOGIN_PREFIX, id);
+    }
+
+    public static String getBackendPermissionkey(Long userId, List<String> permissions) {
+        return String.format(BACKEND_PERMISSION_PREFIX+userId, permissions);
     }
 
 

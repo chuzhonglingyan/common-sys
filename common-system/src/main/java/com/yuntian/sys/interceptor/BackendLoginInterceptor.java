@@ -48,16 +48,16 @@ public class BackendLoginInterceptor implements HandlerInterceptor {
         // 判断Header是否存在令牌信息，如果存在，则允许登录
         String accessToken = request.getHeader(ACCESS_TOKEN);
         if (StringUtils.isBlank(accessToken)) {
-            throw new BusinessException(NOVALID_TOKEN_CODE, "无效token，请重新登录");
+            throw new BusinessException(NOVALID_TOKEN_CODE, "token不存在，请重新登录");
         }
         //此处应该用缓存取
         Operator operator = redisManage.getValue(accessToken);
         if (operator == null || operator.getId() <= 0) {
-            throw new BusinessException(NOVALID_TOKEN_CODE, "无效token，请重新登录");
+            throw new BusinessException(NOVALID_TOKEN_CODE, "token已经失效，请重新登录");
         }
         String orignToken = redisManage.getValue(RedisKey.getBackendTokenkey(String.valueOf(operator.getId())));
         if (!StringUtils.equals(accessToken, orignToken)) {
-            throw new BusinessException(NOVALID_TOKEN_CODE, "无效token，请重新登录");
+            throw new BusinessException(NOVALID_TOKEN_CODE, "token已经失效，请重新登录");
         }
         return true;
     }
