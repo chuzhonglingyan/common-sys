@@ -146,18 +146,15 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
             BusinessException.throwMessage("用户不存在");
         }
         AssertUtil.isNotTrue(PasswordUtil.verify(dto.getPassWord(), operator.getPassWord()), "密码错误");
-        //清除token
-        String useIdKey = RedisKey.getBackendTokenkey(String.valueOf(operator.getId()));
-        String oldToken = redisManage.getValue(useIdKey);
-        if (StringUtils.isNotBlank(oldToken)) {
-            redisManage.del(oldToken);
-        }
+        String tokenKey = RedisKey.getBackendTokenkey(String.valueOf(operator.getId()));
+
         String token = TokenUtil.createToken(String.valueOf(operator.getId()));
+        String useInfoKey = RedisKey.getOperatorInfoKey(token, dto.getClientIp());
         OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
-        //缓存当前用户的token
-        redisManage.set(useIdKey, token, RedisKey.ONE_DAY);
-        redisManage.set(token, operatorVO, RedisKey.ONE_DAY);
+        //缓存当前用户信息
         Objects.requireNonNull(operatorVO).setToken(token);
+        redisManage.set(useInfoKey, operatorVO, RedisKey.ONE_DAY);
+        redisManage.set(tokenKey, token, RedisKey.ONE_DAY);
         return operatorVO;
     }
 

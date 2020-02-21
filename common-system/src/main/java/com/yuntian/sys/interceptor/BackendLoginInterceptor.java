@@ -5,6 +5,7 @@ import com.yuntian.architecture.data.exception.BusinessException;
 import com.yuntian.architecture.redis.config.RedisManage;
 import com.yuntian.sys.common.constant.RedisKey;
 import com.yuntian.sys.model.entity.Operator;
+import com.yuntian.sys.util.IPUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.method.HandlerMethod;
@@ -47,11 +48,12 @@ public class BackendLoginInterceptor implements HandlerInterceptor {
         }
         // 判断Header是否存在令牌信息，如果存在，则允许登录
         String accessToken = request.getHeader(ACCESS_TOKEN);
+        String useInfoKey = RedisKey.getOperatorInfoKey(accessToken, IPUtil.getClientIpAddress(request));
         if (StringUtils.isBlank(accessToken)) {
             throw new BusinessException(NOVALID_TOKEN_CODE, "token不存在，请重新登录");
         }
         //此处应该用缓存取
-        Operator operator = redisManage.getValue(accessToken);
+        Operator operator = redisManage.getValue(useInfoKey);
         if (operator == null || operator.getId() <= 0) {
             throw new BusinessException(NOVALID_TOKEN_CODE, "token已经失效，请重新登录");
         }

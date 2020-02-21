@@ -29,4 +29,7 @@ public class LoginDTO extends BaseDTO implements Serializable {
     private String passWord;
 
 
+    private String clientIp;
+
+
 }

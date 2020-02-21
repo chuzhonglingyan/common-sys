@@ -20,7 +20,7 @@ public abstract class BaseBackendController {
 
 
     @Resource
-    private HttpServletRequest request;
+    protected HttpServletRequest request;
 
     protected Long getUserId() {
         if (getUser() != null) {

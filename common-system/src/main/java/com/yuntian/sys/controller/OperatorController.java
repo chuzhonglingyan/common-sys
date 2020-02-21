@@ -15,6 +15,7 @@ import com.yuntian.sys.model.dto.RegisterDTO;
 import com.yuntian.sys.model.entity.Operator;
 import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.service.OperatorService;
+import com.yuntian.sys.util.IPUtil;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -89,6 +90,7 @@ public class OperatorController extends BaseBackendController {
     @Valid
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public Result login(@RequestBody @Valid LoginDTO dto) {
+        dto.setClientIp(IPUtil.getClientIpAddress(request));
         Operator operator = operatorService.login(dto);
         return ResultGenerator.genSuccessResult(operator);
     }
@@ -101,7 +103,7 @@ public class OperatorController extends BaseBackendController {
      */
     @Valid
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public Result register(@RequestBody @Valid  RegisterDTO dto) {
+    public Result register(@RequestBody @Valid RegisterDTO dto) {
         return ResultGenerator.genSuccessResult(operatorService.register(dto));
     }
 
@@ -114,10 +116,10 @@ public class OperatorController extends BaseBackendController {
     @RequestMapping(value = "/loginOut", method = RequestMethod.POST)
     public Result loginOut() {
         //清除token
-        String token = getToken();
-        String useIdKey = RedisKey.getBackendTokenkey(String.valueOf(getUserId()));
-        redisManage.del(token);
-        redisManage.del(useIdKey);
+        String userInfoKey = RedisKey.getOperatorInfoKey(getToken(), IPUtil.getClientIpAddress(request));
+        String tokenKey = RedisKey.getBackendTokenkey(String.valueOf(getUserId()));
+        redisManage.del(userInfoKey);
+        redisManage.del(tokenKey);
         return ResultGenerator.genSuccessResult();
     }
 

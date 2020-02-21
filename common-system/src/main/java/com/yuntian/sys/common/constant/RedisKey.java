@@ -1,6 +1,9 @@
 package com.yuntian.sys.common.constant;
 
+import com.yuntian.architecture.util.Md5Util;
+
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * @Auther: yuntian
@@ -12,6 +15,8 @@ public class RedisKey {
     private static final String BACKEND_PREFIX = "sys:";
 
     private static final String BACKEND_LOGIN_PREFIX = "sys:token:%s";
+
+    private static final String BACKEND_USER_PREFIX = "sys:user:%s";
 
     private static final String BACKEND_PERMISSION_PREFIX = "sys:permission:%s";
 
@@ -39,8 +44,11 @@ public class RedisKey {
     }
 
 
-    public static String getTokenKey(String id) {
-        return String.format(TOKEN_PREFIX, id);
+    public static String getOperatorInfoKey(String token,String ip) {
+        StringJoiner stringJoiner=new StringJoiner("_", "", "");
+        stringJoiner.add(token);
+        stringJoiner.add(ip);
+        return String.format(BACKEND_USER_PREFIX, Md5Util.md5Hex(stringJoiner.toString()));
     }
 
 }
