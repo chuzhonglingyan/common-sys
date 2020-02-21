@@ -1,4 +1,4 @@
-package com.yuntian.sys.common;//package com.company.project.exception;
+package com.yuntian.sys.common;
 
 import com.alibaba.fastjson.JSON;
 import com.yuntian.architecture.data.Result;
@@ -6,24 +6,31 @@ import com.yuntian.architecture.data.ResultCode;
 import com.yuntian.architecture.data.ResultGenerator;
 import com.yuntian.architecture.data.exception.BusinessException;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
-import java.util.List;
+import java.util.Objects;
+
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 
 
+/**
+ * @author Administrator
+ */
 @RestControllerAdvice
 @Slf4j
 public class ExceptionControllerAdvice {
+
+
+    private static int DUPLICATE_KEY_CODE = 1001;
 
     /**
      * 拦截捕捉自定义异常 BusinessException.class
@@ -38,18 +45,6 @@ public class ExceptionControllerAdvice {
         return result;
     }
 
-    @ExceptionHandler(value = BindException.class)
-    public Result handlerException(BindException ex) {
-        BindingResult bindingResult = ex.getBindingResult();
-        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-        for (FieldError fieldError : fieldErrors) {
-            if (StringUtils.isNotBlank(fieldError.getDefaultMessage())) {
-                log.error("参数异常：" + fieldError.getDefaultMessage());
-                return ResultGenerator.genFailResult(ResultCode.FAIL.code(), fieldError.getDefaultMessage());
-            }
-        }
-        return ResultGenerator.genFailResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "服务器打了个小盹儿~请稍候再试");
-    }
 
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
     public Result handlerException(HttpMessageNotReadableException ex) {
@@ -59,21 +54,40 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public Result handlerException(MethodArgumentNotValidException ex) {
-        BindingResult bindingResult = ex.getBindingResult();
-        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-        for (FieldError fieldError : fieldErrors) {
-            if (StringUtils.isNotBlank(fieldError.getDefaultMessage())) {
-                log.error("参数异常：" + fieldError.getDefaultMessage());
-                return ResultGenerator.genFailResult(ResultCode.FAIL.code(), fieldError.getDefaultMessage());
-            }
-        }
-        return ResultGenerator.genFailResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "服务器打了个小盹儿~请稍候再试");
+        log.error(ex.getMessage(), ex);
+        return ResultGenerator.genFailResult(ResultCode.FAIL.code(), Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage());
     }
+
+    @ExceptionHandler(value = ConstraintViolationException.class)
+    public Result handlerException(ConstraintViolationException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResultGenerator.genFailResult(ResultCode.FAIL.code(), ex.getMessage());
+    }
+
+    @ExceptionHandler(value = ValidationException.class)
+    public Result handlerException(ValidationException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResultGenerator.genFailResult(ResultCode.FAIL.code(), ex.getCause().getMessage());
+    }
+
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public Result handlerException(NoHandlerFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResultGenerator.genFailResult(ResultCode.NOT_FOUND.code(), "路径不存在，请检查路径是否正确");
+    }
+
 
     @ExceptionHandler({Exception.class})
     public Result handlerException(Exception ex) {
-        log.error("发生未知异常：{}", ex);
+        log.error(ex.getMessage(), ex);
         return ResultGenerator.genFailResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "服务器打了个小盹儿~请稍候再试");
     }
 
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public Result handleDuplicateKeyException(DuplicateKeyException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResultGenerator.genFailResult(DUPLICATE_KEY_CODE, "数据重复，请检查后提交");
+    }
 }

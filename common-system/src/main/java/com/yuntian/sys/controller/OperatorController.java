@@ -4,7 +4,6 @@ package com.yuntian.sys.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuntian.architecture.data.Result;
 import com.yuntian.architecture.data.ResultGenerator;
-import com.yuntian.sys.annotation.Valid;
 import com.yuntian.sys.common.BaseBackendController;
 import com.yuntian.sys.common.constant.RedisKey;
 import com.yuntian.sys.model.dto.LoginDTO;
@@ -17,6 +16,7 @@ import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.service.OperatorService;
 import com.yuntian.sys.util.IPUtil;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -87,9 +87,8 @@ public class OperatorController extends BaseBackendController {
      * @param dto
      * @return
      */
-    @Valid
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public Result login(@RequestBody @Valid LoginDTO dto) {
+    public Result login(@RequestBody @Validated LoginDTO dto) {
         dto.setClientIp(IPUtil.getClientIpAddress(request));
         Operator operator = operatorService.login(dto);
         return ResultGenerator.genSuccessResult(operator);
@@ -101,9 +100,8 @@ public class OperatorController extends BaseBackendController {
      * @param dto
      * @return
      */
-    @Valid
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public Result register(@RequestBody @Valid RegisterDTO dto) {
+    public Result register(@RequestBody @Validated RegisterDTO dto) {
         return ResultGenerator.genSuccessResult(operatorService.register(dto));
     }
 
