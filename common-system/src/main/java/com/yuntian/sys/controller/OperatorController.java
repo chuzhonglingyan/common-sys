@@ -2,8 +2,10 @@ package com.yuntian.sys.controller;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.wf.captcha.ArithmeticCaptcha;
 import com.yuntian.architecture.data.Result;
 import com.yuntian.architecture.data.ResultGenerator;
+import com.yuntian.architecture.util.UUIDUitl;
 import com.yuntian.sys.common.BaseBackendController;
 import com.yuntian.sys.common.constant.RedisKey;
 import com.yuntian.sys.model.dto.LoginDTO;
@@ -12,16 +14,21 @@ import com.yuntian.sys.model.dto.OperatorSaveDTO;
 import com.yuntian.sys.model.dto.OperatorUpdateDTO;
 import com.yuntian.sys.model.dto.RegisterDTO;
 import com.yuntian.sys.model.entity.Operator;
+import com.yuntian.sys.model.vo.CodeImageVO;
+import com.yuntian.sys.model.vo.MenuComponentVo;
 import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.service.OperatorService;
 import com.yuntian.sys.util.IPUtil;
 
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -81,6 +88,14 @@ public class OperatorController extends BaseBackendController {
     }
 
 
+    @PostMapping("/getMenuTree")
+    public Result getMenuTree() {
+        List<MenuComponentVo> componentVoList= operatorService.getMenuComponentTreeVoListByOperator(getUserId());
+        return ResultGenerator.genSuccessResult(componentVoList);
+    }
+
+
+
     /**
      * 登录，使用POST，传输数据
      *
@@ -121,4 +136,27 @@ public class OperatorController extends BaseBackendController {
         return ResultGenerator.genSuccessResult();
     }
 
+
+    /**
+     * 获取验证码
+     *
+     * @return
+     */
+    @GetMapping(value = "/code")
+    public Result getCode() {
+        // 算术类型 https://gitee.com/whvse/EasyCaptcha
+        ArithmeticCaptcha captcha = new ArithmeticCaptcha(111, 36);
+        // 几位数运算，默认是两位
+        captcha.setLen(2);
+        // 获取运算的结果
+        String result = captcha.text();
+        String uuid = UUIDUitl.getUUIDName();
+        // 保存
+        redisManage.set(uuid, result, 60);
+        // 验证码信息
+        CodeImageVO codeImage = new CodeImageVO();
+        codeImage.setImg(captcha.toBase64());
+        codeImage.setUuid(uuid);
+        return ResultGenerator.genSuccessResult(codeImage);
+    }
 }

@@ -1,7 +1,9 @@
 package com.yuntian.sys.common;
 
 import com.yuntian.architecture.redis.config.RedisManage;
+import com.yuntian.sys.common.constant.RedisKey;
 import com.yuntian.sys.model.entity.Operator;
+import com.yuntian.sys.util.IPUtil;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,7 +44,8 @@ public abstract class BaseBackendController {
     public Operator getUser() {
         String token = request.getHeader(ACCESS_TOKEN);
         if (StringUtils.isNotBlank(token)) {
-            return redisManage.getValue(token);
+            String useInfoKey = RedisKey.getOperatorInfoKey(token, IPUtil.getClientIpAddress(request));
+            return redisManage.getValue(useInfoKey);
         }
         return null;
     }

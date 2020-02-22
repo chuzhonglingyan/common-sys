@@ -10,11 +10,11 @@ public enum EnabledEnum {
     /**
      * 启用
      */
-    ENABLED("启用", 0),
+    ENABLED("启用", 1),
     /**
      * 禁用
      */
-    DISENABLED("禁用", 1),
+    DISENABLED("禁用", 0),
     ;
 
     private String name;

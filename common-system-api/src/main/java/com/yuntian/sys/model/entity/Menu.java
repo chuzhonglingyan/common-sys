@@ -31,37 +31,49 @@ public class Menu extends BaseEntity {
     /**
     * 菜单名称
     */
-    private String menuName;
+    private String name;
 
     /**
     * 菜单等级 1一级菜单  2 二级菜单  3 三级菜单
     */
-    private Integer menuLevel;
+    private Integer level;
 
     /**
-    * 菜单url
+    * 菜单路径
     */
-    private String menuUrl;
+    private String path;
 
     /**
     * 授权(多个用逗号分隔，如：user:list,user:add)
     */
-    private String menuCode;
+    private String permissionCode;
 
     /**
     * 菜单类型，0：根目录,1：菜单，2：操作
     */
-    private Integer menuType;
+    private Integer type;
 
     /**
     * 0：禁用  1：启用
     */
-    private Integer menuStatus;
+    private Integer status;
 
     /**
     * 排序
     */
     private Integer sort;
+
+
+    private String component;
+
+
+    private String componentName;
+
+    private String iconCode;
+
+    private Integer iconCache;
+
+    private Integer iFrame;
 
     /**
     * 是否删除，0-未删除，1-删除，默认为0

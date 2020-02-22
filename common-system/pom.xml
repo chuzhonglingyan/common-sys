@@ -16,6 +16,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
+
+
     <dependencies>
 
         <dependency>
@@ -46,6 +48,8 @@
             <artifactId>common-redis</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+
 
     </dependencies>
 </project>

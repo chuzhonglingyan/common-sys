@@ -16,6 +16,8 @@ import com.yuntian.sys.model.dto.MenuQueryDTO;
 import com.yuntian.sys.model.dto.MenuSaveDTO;
 import com.yuntian.sys.model.dto.MenuUpdateDTO;
 import com.yuntian.sys.model.entity.Menu;
+import com.yuntian.sys.model.vo.MenuComponentVo;
+import com.yuntian.sys.model.vo.MenuMetaVo;
 import com.yuntian.sys.model.vo.MenuTreeVO;
 import com.yuntian.sys.service.MenuService;
 import com.yuntian.sys.service.RoleMenuService;
@@ -31,7 +33,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
+
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 
 import static com.yuntian.sys.common.constant.Constants.ONE;
 
@@ -59,14 +65,14 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
     public void saveByDTO(MenuSaveDTO dto) {
         Menu menu = BeanCopyUtil.copyProperties(dto, Menu.class);
         if (dto.getPid() == 0) {
-            dto.setMenuLevel(ONE);
-            dto.setMenuType(MenuTypeEnum.ROOT.getType());
+            dto.setLevel(ONE);
+            dto.setType(MenuTypeEnum.ROOT.getType());
         } else {
             Menu parentMenu = getParentMenu(dto.getPid());
-            if (parentMenu.getMenuType() == MenuTypeEnum.BUTTON.getType()) {
+            if (parentMenu.getType() == MenuTypeEnum.BUTTON.getType()) {
                 BusinessException.throwMessage("操作类型菜单不能添加子级菜单");
             }
-            dto.setMenuLevel(parentMenu.getMenuLevel() + 1);
+            dto.setLevel(parentMenu.getLevel() + 1);
             List<Menu> brotherList = findDirectChildByPid(dto.getPid());
             Integer sort = brotherList == null ? 1 : brotherList.size() + 1;
             dto.setSort(sort);
@@ -89,7 +95,7 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
     public void deleteByDTO(Menu dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
         Menu menu = getById(dto.getId());
-        if (menu.getMenuStatus() == EnabledEnum.DISENABLED.getType()) {
+        if (menu.getStatus() == EnabledEnum.DISENABLED.getType()) {
             BusinessException.throwMessage("菜单处于冻结状态，无法删除.");
         }
         List<Menu> list = findDirectChildByPid(dto.getId());
@@ -102,20 +108,20 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
 
     @Override
     public void isEnable(Menu dto) {
-        dto.setMenuStatus(EnabledEnum.DISENABLED.getType());
+        dto.setStatus(EnabledEnum.DISENABLED.getType());
         UpdateWrapper<Menu> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("id", dto.getId());
-        updateWrapper.set("menu_status", EnabledEnum.ENABLED.getType());
+        updateWrapper.set("status", EnabledEnum.ENABLED.getType());
         update(dto, updateWrapper);
     }
 
 
     @Override
     public void isDisEnable(Menu dto) {
-        dto.setMenuStatus(EnabledEnum.ENABLED.getType());
+        dto.setStatus(EnabledEnum.ENABLED.getType());
         UpdateWrapper<Menu> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("id", dto.getId());
-        updateWrapper.set("menu_status", EnabledEnum.DISENABLED.getType());
+        updateWrapper.set("status", EnabledEnum.DISENABLED.getType());
         update(dto, updateWrapper);
     }
 
@@ -131,7 +137,7 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
     public List<Menu> getEnableMenuList(List<Long> idList) {
         LambdaQueryWrapper<Menu> lambdaQueryWrapper = new QueryWrapper<Menu>().lambda()
                 .in(Menu::getId, idList)
-                .eq(Menu::getMenuStatus, EnabledEnum.ENABLED.getType());
+                .eq(Menu::getStatus, EnabledEnum.ENABLED.getType());
         return list(lambdaQueryWrapper);
     }
 
@@ -145,7 +151,7 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
     public List<Menu> getEnableMenuList() {
         Map<String, Object> map = new HashMap<>();
         //列名条件
-        map.put("menu_status", EnabledEnum.ENABLED.getType());
+        map.put("status", EnabledEnum.ENABLED.getType());
         return super.listByMap(map);
     }
 

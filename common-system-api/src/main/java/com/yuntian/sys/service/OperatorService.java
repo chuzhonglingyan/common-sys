@@ -12,6 +12,7 @@ import com.yuntian.sys.model.dto.OperatorUpdateDTO;
 import com.yuntian.sys.model.dto.RegisterDTO;
 import com.yuntian.sys.model.entity.Menu;
 import com.yuntian.sys.model.entity.Operator;
+import com.yuntian.sys.model.vo.MenuComponentVo;
 import com.yuntian.sys.model.vo.MenuTreeVO;
 import com.yuntian.sys.model.vo.OperatorVO;
 
@@ -39,6 +40,9 @@ public interface OperatorService extends IBaseService<Operator> {
     IPage<Operator> queryListByPage(OperatorQueryDTO dto);
 
     List<MenuTreeVO> getMenuTreeVoListByOperator(Long operatorId);
+
+
+    List<MenuComponentVo> getMenuComponentTreeVoListByOperator(Long operatorId);
 
     void deleteBatchByDTO(Collection<Operator> entityList);
 

@@ -23,6 +23,7 @@ import com.yuntian.sys.model.dto.RegisterDTO;
 import com.yuntian.sys.model.entity.Menu;
 import com.yuntian.sys.model.entity.Operator;
 import com.yuntian.sys.model.entity.Role;
+import com.yuntian.sys.model.vo.MenuComponentVo;
 import com.yuntian.sys.model.vo.MenuTreeVO;
 import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.service.OperatorRoleService;
@@ -32,6 +33,7 @@ import com.yuntian.sys.util.TreeUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -45,6 +47,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import cn.hutool.crypto.asymmetric.KeyType;
+import cn.hutool.crypto.asymmetric.RSA;
+
 /**
  * <p>
  * 后台系统-用户表 服务实现类
@@ -55,6 +60,10 @@ import javax.annotation.Resource;
  */
 @Service
 public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operator> implements OperatorService {
+
+
+    @Value("${rsa.private_key}")
+    private String privateKey;
 
     @Resource
     private RedisManage redisManage;
@@ -141,18 +150,35 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
     public OperatorVO login(LoginDTO dto) {
         AssertUtil.isNotBlank(dto.getAccount(), "账号名不能为空");
         AssertUtil.isNotBlank(dto.getPassWord(), "密码不能为空");
-        Operator operator = getUserByAccount(dto.getAccount());
-        if (Objects.isNull(operator)) {
-            BusinessException.throwMessage("用户不存在");
+        // 查询验证码
+        String code = redisManage.getValue(dto.getUuid());
+        // 清除验证码
+        if (StringUtils.isNotBlank(dto.getCode())){
+            redisManage.del(dto.getUuid());
         }
-        AssertUtil.isNotTrue(PasswordUtil.verify(dto.getPassWord(), operator.getPassWord()), "密码错误");
-        String tokenKey = RedisKey.getBackendTokenkey(String.valueOf(operator.getId()));
+        if (StringUtils.isBlank(code)) {
+            throw new BusinessException("验证码不存在或已过期");
+        }
+        if (StringUtils.isBlank(dto.getCode()) || !dto.getCode().equalsIgnoreCase(code)) {
+            throw new BusinessException("验证码错误");
+        }
+        // 密码解密
+        RSA rsa = new RSA(privateKey, null);
+        String password = null;
+        try {
+            password = new String(rsa.decrypt(dto.getPassWord(), KeyType.PrivateKey));
+        } catch (Exception e) {
+            BusinessException.throwMessage("密码解密错误");
+        }
+        OperatorVO operatorVO = getInfo(dto.getAccount());
+        AssertUtil.isNotTrue(PasswordUtil.verify(password, operatorVO.getPassWord()), "密码错误");
+        String tokenKey = RedisKey.getBackendTokenkey(String.valueOf(operatorVO.getId()));
 
-        String token = TokenUtil.createToken(String.valueOf(operator.getId()));
+        String token = TokenUtil.createToken(String.valueOf(operatorVO.getId()));
         String useInfoKey = RedisKey.getOperatorInfoKey(token, dto.getClientIp());
-        OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
         //缓存当前用户信息
         Objects.requireNonNull(operatorVO).setToken(token);
+
         redisManage.set(useInfoKey, operatorVO, RedisKey.ONE_DAY);
         redisManage.set(tokenKey, token, RedisKey.ONE_DAY);
         return operatorVO;
@@ -199,7 +225,7 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
         List<Role> roleVoList = operatorRoleService.getEnableListByOperatorId(userId);
         List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(Collectors.toList());
-        Objects.requireNonNull(operatorVO).setRoleList(roleKeyList);
+        Objects.requireNonNull(operatorVO).setRoles(roleKeyList);
         return operatorVO;
     }
 
@@ -209,10 +235,12 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
                 .eq(Operator::getAccount, account);
         Operator operator = getOne(lambdaQueryWrapper);
         AssertUtil.isNotNull(operator, "该用户不存在");
+
+
         OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
         List<Role> roleVoList = operatorRoleService.getEnableListByOperatorId(operator.getId());
         List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(Collectors.toList());
-        Objects.requireNonNull(operatorVO).setRoleList(roleKeyList);
+        Objects.requireNonNull(operatorVO).setRoles(roleKeyList);
         return operatorVO;
     }
 
@@ -223,6 +251,16 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
             return new ArrayList<>();
         }
         return TreeUtil.getMenuTreeVolist(menuList);
+    }
+
+    @Override
+    public List<MenuComponentVo> getMenuComponentTreeVoListByOperator(Long operatorId) {
+        List<Menu> menuList = getEnableMenuListByOperatorId(operatorId);
+        if (CollectionUtils.isEmpty(menuList)) {
+            return new ArrayList<>();
+        }
+        List<MenuTreeVO> menuTreeVOList = TreeUtil.buildMenuTree(menuList);
+        return TreeUtil.buildMenuComponents(menuTreeVOList);
     }
 
 

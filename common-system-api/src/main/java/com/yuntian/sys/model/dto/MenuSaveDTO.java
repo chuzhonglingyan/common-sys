@@ -33,23 +33,23 @@ public class MenuSaveDTO extends BaseDTO implements Serializable {
 
     @NotBlank(message = "菜单名称不能为空")
     @Length(max = 50, message = "菜单名称最大50位")
-    private String menuName;
+    private String name;
 
 
     @NotBlank(message = "菜单url不能为空")
     @Length(max = 500, message = "菜单url最大500位")
-    private String menuUrl;
+    private String path;
 
 
     @NotBlank(message = "菜单权限code不能为空")
     @Length(max = 500, message = "菜单权限code最大500位")
-    private String menuCode;
+    private String permissionCode;
 
 
     @NotNull(message = "菜单类型不能为空")
-    private Integer menuType;
+    private Integer type;
 
-    private Integer menuLevel;
+    private Integer level;
 
     private Integer sort;
 

@@ -21,7 +21,7 @@ public class OperatorVO extends Operator {
      */
     private String token;
 
-    private List<String> roleList;
+    private List<String> roles;
 
     private List<String> permissionList;
 

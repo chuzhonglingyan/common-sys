@@ -54,7 +54,7 @@ public class PermissionAspect {
         String token = request.getHeader(ACCESS_TOKEN);
         Operator operator = redisManage.getValue(token);
         List<Menu> menuList = operatorService.getEnableMenuListByOperatorId(operator.getId());
-        List<String> userPermissions = menuList.stream().map(Menu::getMenuCode).collect(Collectors.toList());
+        List<String> userPermissions = menuList.stream().map(Menu::getPermissionCode).collect(Collectors.toList());
         if (!userPermissions.contains(permissionCode)) {
             BusinessException.throwMessage(ResultCode.UNAUTHORIZED.code(), "无权限访问");
         }

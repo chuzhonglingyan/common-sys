@@ -184,9 +184,12 @@ public class OperatorRoleServiceImpl extends BaseServiceImpl<OperatorRoleMapper,
     @Override
     public List<Role> getEnableListByOperatorId(Long operatorId) {
         List<Long> roleIdList = getRoleIdListByOperatorId(operatorId);
+        if (CollectionUtils.isEmpty(roleIdList)){
+            return new ArrayList<>();
+        }
         LambdaQueryWrapper<Role> lambdaQueryWrapper = new QueryWrapper<Role>().lambda()
-                .in(Role::getId, roleIdList)
-                .eq(Role::getStatus, EnabledEnum.ENABLED.getType());
+                .eq(Role::getStatus, EnabledEnum.ENABLED.getType())
+                .in(Role::getId, roleIdList);
         return roleService.list(lambdaQueryWrapper);
     }
 
