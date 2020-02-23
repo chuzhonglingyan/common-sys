@@ -6,6 +6,7 @@ import com.yuntian.architecture.redis.config.RedisManage;
 import com.yuntian.sys.annotation.Permission;
 import com.yuntian.sys.model.entity.Menu;
 import com.yuntian.sys.model.entity.Operator;
+import com.yuntian.sys.service.MenuService;
 import com.yuntian.sys.service.OperatorService;
 
 import org.aspectj.lang.JoinPoint;
@@ -38,7 +39,7 @@ public class PermissionAspect {
     private RedisManage redisManage;
 
     @Resource
-    private OperatorService operatorService;
+    private MenuService menuService;
 
 
     @Pointcut("@annotation(com.yuntian.sys.annotation.Permission)")
@@ -53,7 +54,7 @@ public class PermissionAspect {
         String permissionCode = permission.value();
         String token = request.getHeader(ACCESS_TOKEN);
         Operator operator = redisManage.getValue(token);
-        List<Menu> menuList = operatorService.getEnableMenuListByOperatorId(operator.getId());
+        List<Menu> menuList = menuService.getEnableMenuListByOperatorId(operator.getId());
         List<String> userPermissions = menuList.stream().map(Menu::getPermissionCode).collect(Collectors.toList());
         if (!userPermissions.contains(permissionCode)) {
             BusinessException.throwMessage(ResultCode.UNAUTHORIZED.code(), "无权限访问");

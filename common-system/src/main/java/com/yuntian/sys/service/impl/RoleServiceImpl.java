@@ -14,6 +14,9 @@ import com.yuntian.sys.model.dto.RoleQueryDTO;
 import com.yuntian.sys.model.dto.RoleSaveDTO;
 import com.yuntian.sys.model.dto.RoleUpdateDTO;
 import com.yuntian.sys.model.entity.Role;
+import com.yuntian.sys.model.entity.RoleMenu;
+import com.yuntian.sys.model.vo.PageVO;
+import com.yuntian.sys.model.vo.RoleVO;
 import com.yuntian.sys.service.OperatorRoleService;
 import com.yuntian.sys.service.RoleMenuService;
 import com.yuntian.sys.service.RoleService;
@@ -22,10 +25,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -116,10 +122,21 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, Role> implement
     }
 
     @Override
-    public IPage<Role> queryListByPage(RoleQueryDTO dto) {
+    public PageVO<RoleVO> queryListByPage(RoleQueryDTO dto) {
         AssertUtil.isNotNull(dto, "参数不能为空");
-        IPage<Role> page = new Page<>(dto.getCurrent(), dto.getSize());
-        return page(page);
+        IPage<Role> pageParam = new Page<>(dto.getCurrent(), dto.getSize());
+        PageVO<RoleVO> roleVoPage=new PageVO<RoleVO>(page(pageParam)){};
+        List<RoleVO> roleVoList=roleVoPage.getRecords();
+        if (CollectionUtils.isEmpty(roleVoList)){
+            return roleVoPage;
+        }
+        List<Long> roleIdList=roleVoList.stream().map(RoleVO::getId).distinct().collect(Collectors.toList());
+        List<RoleMenu> roleMenuList=roleMenuService.getRoleMenuList(roleIdList);
+        Map<Long, List<Long>> groupByRoleId = roleMenuList.stream().collect(Collectors.groupingBy(RoleMenu::getRoleId,Collectors.mapping(RoleMenu::getMenuId,Collectors.toList())));
+        roleVoPage.getRecords().forEach(roleVO -> {
+            roleVO.setMenuIdList(groupByRoleId.getOrDefault(roleVO.getId(),new ArrayList<>()));
+        });
+        return roleVoPage;
     }
 
     @Override

@@ -34,9 +34,19 @@ public class Operator extends BaseEntity {
     private String userName;
 
     /**
+     * 昵称
+     */
+    private String nickName;
+
+    /**
     * 密码
     */
     private String passWord;
+
+    /**
+     * 性别
+     */
+    private Integer sex;
 
     /**
      * 头像

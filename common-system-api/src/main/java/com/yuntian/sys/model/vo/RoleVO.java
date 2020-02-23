@@ -16,7 +16,7 @@ public class RoleVO extends Role implements Serializable {
 
     private Boolean isChecked;
 
-    private List<String> routes;
+    private List<Long> menuIdList;
 
 
 }

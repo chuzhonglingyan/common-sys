@@ -37,8 +37,8 @@ public class RoleMenuController extends BaseBackendController {
     }
 
     @PostMapping("/getMenuListByRoleId")
-    public  List<MenuVO>  getMenuListByRoleId(@RequestParam Long roleId) {
-        return roleMenuService.getMenuListByRoleId(roleId);
+    public  Result getMenuListByRoleId(@RequestParam Long roleId) {
+        return ResultGenerator.genSuccessResult(roleMenuService.getMenuListByRoleId(roleId));
     }
 
 

@@ -35,6 +35,11 @@ public class Role extends BaseEntity {
     private String name;
 
     /**
+     * 角色级别
+     */
+    private Integer level;
+
+    /**
     * 角色状态 0:冻结  1：开通
     */
     private Integer status;
@@ -42,7 +47,7 @@ public class Role extends BaseEntity {
     /**
     * 描述
     */
-    private String description;
+    private String remark;
 
     /**
     * 是否删除，0-未删除，1-删除，默认为0

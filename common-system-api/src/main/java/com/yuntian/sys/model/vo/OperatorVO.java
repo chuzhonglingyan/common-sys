@@ -25,4 +25,11 @@ public class OperatorVO extends Operator {
 
     private List<String> permissionList;
 
+    private String dept;
+
+    private String sexText;
+
+    public String getSexText() {
+        return getSex()==0?"男":"女";
+    }
 }

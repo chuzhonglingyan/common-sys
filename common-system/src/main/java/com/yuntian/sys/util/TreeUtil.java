@@ -4,6 +4,7 @@ import com.yuntian.architecture.util.BeanCopyUtil;
 import com.yuntian.sys.model.entity.Menu;
 import com.yuntian.sys.model.vo.MenuComponentVo;
 import com.yuntian.sys.model.vo.MenuMetaVo;
+import com.yuntian.sys.model.vo.MenuTreeLabelVO;
 import com.yuntian.sys.model.vo.MenuTreeVO;
 
 import java.util.ArrayList;
@@ -39,11 +40,11 @@ public class TreeUtil {
         for (MenuTreeVO menuTreeVO : list) {
             for (MenuTreeVO child : list) {
                 List<MenuTreeVO> treeVoList;
-                if (menuTreeVO.getChildList() == null) {
+                if (menuTreeVO.getChildren() == null) {
                     treeVoList = new ArrayList<>();
-                    menuTreeVO.setChildList(treeVoList);
+                    menuTreeVO.setChildren(treeVoList);
                 } else {
-                    treeVoList = menuTreeVO.getChildList();
+                    treeVoList = menuTreeVO.getChildren();
                 }
                 if (menuTreeVO.getId().equals(child.getPid())) {
                     treeVoList.add(child);
@@ -62,6 +63,41 @@ public class TreeUtil {
         return buildTree(menuTreeVoList);
     }
 
+    public static List<MenuTreeLabelVO> buildMenuLableTree(List<Menu> menuList) {
+        List<MenuTreeLabelVO> menuTreeVoList = new ArrayList<>();
+        for (Menu menu : menuList) {
+            MenuTreeLabelVO menuTreeVO = new MenuTreeLabelVO();
+            menuTreeVO.setId(menu.getId());
+            menuTreeVO.setPid(menu.getPid());
+            menuTreeVO.setLabel(menu.getName());
+            menuTreeVoList.add(menuTreeVO);
+        }
+        return buildLableTree(menuTreeVoList);
+    }
+
+    private static List<MenuTreeLabelVO> buildLableTree(List<MenuTreeLabelVO> list) {
+        List<MenuTreeLabelVO> trees = new ArrayList<>();
+        Set<Long> ids = new HashSet<>();
+        for (MenuTreeLabelVO menuTreeVO : list) {
+            if (menuTreeVO.getPid() == 0) {
+                trees.add(menuTreeVO);
+            }
+            for (MenuTreeLabelVO it : list) {
+                if (it.getPid().equals(menuTreeVO.getId())) {
+                    if (menuTreeVO.getChildren() == null) {
+                        menuTreeVO.setChildren(new ArrayList<>());
+                    }
+                    menuTreeVO.getChildren().add(it);
+                    ids.add(it.getId());
+                }
+            }
+        }
+        if (trees.size() == 0) {
+            trees = list.stream().filter(s -> !ids.contains(s.getId())).collect(Collectors.toList());
+        }
+        return trees;
+    }
+
 
     public static List<MenuTreeVO> buildTree(List<MenuTreeVO> list) {
         List<MenuTreeVO> trees = new ArrayList<>();
@@ -72,10 +108,10 @@ public class TreeUtil {
             }
             for (MenuTreeVO it : list) {
                 if (it.getPid().equals(menuTreeVO.getId())) {
-                    if (menuTreeVO.getChildList() == null) {
-                        menuTreeVO.setChildList(new ArrayList<>());
+                    if (menuTreeVO.getChildren() == null) {
+                        menuTreeVO.setChildren(new ArrayList<>());
                     }
-                    menuTreeVO.getChildList().add(it);
+                    menuTreeVO.getChildren().add(it);
                     ids.add(it.getId());
                 }
             }
@@ -91,7 +127,7 @@ public class TreeUtil {
         List<MenuComponentVo> list = new ArrayList<>();
         menuRootTreeList.forEach(menuTreeVO -> {
                     if (menuTreeVO != null) {
-                        List<MenuTreeVO> menuTreeVoList = menuTreeVO.getChildList();
+                        List<MenuTreeVO> menuTreeVoList = menuTreeVO.getChildren();
                         MenuComponentVo menuComponentVo = new MenuComponentVo();
                         menuComponentVo.setName(ObjectUtil.isNotEmpty(menuTreeVO.getComponentName()) ? menuTreeVO.getComponentName() : menuTreeVO.getName());
                         // 一级目录需要加斜杠，不然会报警告
@@ -105,7 +141,7 @@ public class TreeUtil {
                                 menuComponentVo.setComponent(menuTreeVO.getComponent());
                             }
                         }
-                        menuComponentVo.setMeta(new MenuMetaVo(menuTreeVO.getName(), menuTreeVO.getIconCode(),menuTreeVO.getIconCache()==0));
+                        menuComponentVo.setMeta(new MenuMetaVo(menuTreeVO.getName(), menuTreeVO.getIcon(),menuTreeVO.getCache()==0));
                         if (menuTreeVoList != null && menuTreeVoList.size()>0) {
                             menuComponentVo.setAlwaysShow(true);
                             menuComponentVo.setRedirect("noredirect");

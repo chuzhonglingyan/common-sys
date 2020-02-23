@@ -16,10 +16,16 @@ import com.yuntian.sys.model.dto.MenuQueryDTO;
 import com.yuntian.sys.model.dto.MenuSaveDTO;
 import com.yuntian.sys.model.dto.MenuUpdateDTO;
 import com.yuntian.sys.model.entity.Menu;
+import com.yuntian.sys.model.entity.Operator;
+import com.yuntian.sys.model.entity.Role;
 import com.yuntian.sys.model.vo.MenuComponentVo;
 import com.yuntian.sys.model.vo.MenuMetaVo;
+import com.yuntian.sys.model.vo.MenuTreeLabelVO;
 import com.yuntian.sys.model.vo.MenuTreeVO;
+import com.yuntian.sys.model.vo.PageVO;
+import com.yuntian.sys.model.vo.RoleVO;
 import com.yuntian.sys.service.MenuService;
+import com.yuntian.sys.service.OperatorRoleService;
 import com.yuntian.sys.service.RoleMenuService;
 import com.yuntian.sys.util.TreeUtil;
 
@@ -33,6 +39,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -55,6 +62,10 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
 
     @Resource
     private RoleMenuService roleMenuService;
+
+    @Resource
+    private OperatorRoleService operatorRoleService;
+
 
     /**
      * 保存菜单
@@ -221,14 +232,49 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
 
 
     @Override
-    public List<MenuTreeVO> getMenuTreeVoList() {
-        List<Menu> menuList = list();
+    public PageVO<MenuTreeVO> getMenuTreeVoList(MenuQueryDTO dto) {
+        List<Menu> menuList=list();
+        PageVO<MenuTreeVO> pageVO=new PageVO<>();
+        pageVO.setRecords(TreeUtil.buildMenuTree(menuList));
+        pageVO.setTotal((long) pageVO.getRecords().size());
+        return pageVO;
+    }
+
+    @Override
+    public List<MenuTreeLabelVO> getEnabledMenuTreeList() {
+        List<Menu> menuList=getEnableMenuList();
+        return TreeUtil.buildMenuLableTree(menuList);
+    }
+
+
+    @Override
+    public List<MenuTreeVO> getMenuTreeVoListByOperator(Long operatorId) {
+        List<Menu> menuList = getEnableMenuListByOperatorId(operatorId);
         if (CollectionUtils.isEmpty(menuList)) {
             return new ArrayList<>();
         }
         return TreeUtil.getMenuTreeVolist(menuList);
     }
 
+    @Override
+    public List<MenuComponentVo> getMenuComponentTreeVoListByOperator(Long operatorId) {
+        List<Menu> menuList = getEnableMenuListByOperatorId(operatorId);
+        if (CollectionUtils.isEmpty(menuList)) {
+            return new ArrayList<>();
+        }
+        List<MenuTreeVO> menuTreeVOList = TreeUtil.buildMenuTree(menuList);
+        return TreeUtil.buildMenuComponents(menuTreeVOList);
+    }
 
+
+    @Override
+    public List<Menu> getEnableMenuListByOperatorId(Long operatorId) {
+        List<Role> roleList = operatorRoleService.getEnableListByOperatorId(operatorId);
+        if (CollectionUtils.isEmpty(roleList)) {
+            return new ArrayList<>();
+        }
+        List<Long> roleIdList = roleList.stream().map(Role::getId).collect(Collectors.toList());
+        return roleMenuService.getEnableMenuListByRoleIds(roleIdList);
+    }
 
 }

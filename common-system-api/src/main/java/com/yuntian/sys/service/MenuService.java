@@ -10,7 +10,10 @@ import com.yuntian.sys.model.dto.MenuQueryDTO;
 import com.yuntian.sys.model.dto.MenuSaveDTO;
 import com.yuntian.sys.model.dto.MenuUpdateDTO;
 import com.yuntian.sys.model.entity.Menu;
+import com.yuntian.sys.model.vo.MenuComponentVo;
+import com.yuntian.sys.model.vo.MenuTreeLabelVO;
 import com.yuntian.sys.model.vo.MenuTreeVO;
+import com.yuntian.sys.model.vo.PageVO;
 
 /**
  * <p>
@@ -47,6 +50,16 @@ public interface MenuService extends IBaseService<Menu> {
 
     List<Menu> getEnableMenuList(List<Long> idList);
 
-    List<MenuTreeVO> getMenuTreeVoList();
+    PageVO<MenuTreeVO> getMenuTreeVoList(MenuQueryDTO dto);
+
+    List<MenuTreeLabelVO> getEnabledMenuTreeList();
+
+
+    List<Menu> getEnableMenuListByOperatorId(Long operatorId);
+
+    List<MenuTreeVO> getMenuTreeVoListByOperator(Long operatorId);
+
+
+    List<MenuComponentVo> getMenuComponentTreeVoListByOperator(Long operatorId);
 
 }

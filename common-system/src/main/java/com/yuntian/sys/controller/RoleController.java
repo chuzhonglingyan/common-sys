@@ -65,8 +65,8 @@ public class RoleController extends BaseBackendController {
 
 
     @PostMapping("/list")
-    public IPage<Role> list(RoleQueryDTO dto) {
-        return roleService.queryListByPage(dto);
+    public Result list(RoleQueryDTO dto) {
+        return ResultGenerator.genSuccessResult(roleService.queryListByPage(dto));
     }
 
 }

@@ -38,6 +38,9 @@ public interface RoleMenuService extends IBaseService<RoleMenu> {
 
    IPage<RoleMenu> queryListByPage(RoleMenuDTO dto);
 
+
+   List<RoleMenu> getRoleMenuList(List<Long> roleIdList);
+
    List<Long> getMenuIdListByRoleId(Long roleId);
 
    List<Long> getMenuIdListByRoleId(List<Long> roleIdList);

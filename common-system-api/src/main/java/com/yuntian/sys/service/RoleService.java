@@ -12,6 +12,8 @@ import com.yuntian.sys.model.dto.RoleQueryDTO;
 import com.yuntian.sys.model.dto.RoleSaveDTO;
 import com.yuntian.sys.model.dto.RoleUpdateDTO;
 import com.yuntian.sys.model.entity.Role;
+import com.yuntian.sys.model.vo.PageVO;
+import com.yuntian.sys.model.vo.RoleVO;
 
 /**
  * <p>
@@ -35,7 +37,7 @@ public interface RoleService extends IBaseService<Role> {
     void isDisEnable(Role dto);
 
 
-    IPage<Role> queryListByPage(RoleQueryDTO dto);
+    PageVO<RoleVO> queryListByPage(RoleQueryDTO dto);
 
     void deleteBatchByDTO(Collection<Role> entityList);
 

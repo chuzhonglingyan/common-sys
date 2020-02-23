@@ -69,9 +69,9 @@ public class Menu extends BaseEntity {
 
     private String componentName;
 
-    private String iconCode;
+    private String icon;
 
-    private Integer iconCache;
+    private Integer cache;
 
     private Integer iFrame;
 

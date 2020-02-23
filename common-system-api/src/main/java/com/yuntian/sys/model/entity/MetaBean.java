@@ -12,7 +12,7 @@ public class MetaBean {
 
     /**
      * title : 系统管理
-     * iconCode : system
+     * icon : system
      * noCache : true
      */
 

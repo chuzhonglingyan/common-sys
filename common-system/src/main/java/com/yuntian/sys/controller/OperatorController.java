@@ -83,15 +83,8 @@ public class OperatorController extends BaseBackendController {
 
 
     @PostMapping("/list")
-    public IPage<Operator> list(OperatorQueryDTO dto) {
-        return operatorService.queryListByPage(dto);
-    }
-
-
-    @PostMapping("/getMenuTree")
-    public Result getMenuTree() {
-        List<MenuComponentVo> componentVoList= operatorService.getMenuComponentTreeVoListByOperator(getUserId());
-        return ResultGenerator.genSuccessResult(componentVoList);
+    public  Result list(@RequestBody OperatorQueryDTO dto) {
+        return ResultGenerator.genSuccessResult(operatorService.queryListByPage(dto));
     }
 
 

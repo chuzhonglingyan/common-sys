@@ -20,26 +20,20 @@ import com.yuntian.sys.model.dto.OperatorQueryDTO;
 import com.yuntian.sys.model.dto.OperatorSaveDTO;
 import com.yuntian.sys.model.dto.OperatorUpdateDTO;
 import com.yuntian.sys.model.dto.RegisterDTO;
-import com.yuntian.sys.model.entity.Menu;
 import com.yuntian.sys.model.entity.Operator;
 import com.yuntian.sys.model.entity.Role;
-import com.yuntian.sys.model.vo.MenuComponentVo;
-import com.yuntian.sys.model.vo.MenuTreeVO;
 import com.yuntian.sys.model.vo.OperatorVO;
+import com.yuntian.sys.model.vo.PageVO;
 import com.yuntian.sys.service.OperatorRoleService;
 import com.yuntian.sys.service.OperatorService;
-import com.yuntian.sys.service.RoleMenuService;
-import com.yuntian.sys.util.TreeUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -71,9 +65,6 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
 
     @Resource
     private OperatorRoleService operatorRoleService;
-
-    @Resource
-    private RoleMenuService roleMenuService;
 
 
     @Override
@@ -134,10 +125,12 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
 
 
     @Override
-    public IPage<Operator> queryListByPage(OperatorQueryDTO dto) {
+    public PageVO<OperatorVO> queryListByPage(OperatorQueryDTO dto) {
         AssertUtil.isNotNull(dto, "参数不能为空");
-        IPage<Operator> page = new Page<>(dto.getCurrent(), dto.getSize());
-        return page(page);
+        IPage<Operator> pageParam = new Page<>(dto.getCurrent(), dto.getSize());
+        LambdaQueryWrapper<Operator> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.orderByDesc(Operator::getUpdateTime);
+        return new PageVO<OperatorVO>(page(pageParam,queryWrapper)){};
     }
 
 
@@ -153,7 +146,7 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         // 查询验证码
         String code = redisManage.getValue(dto.getUuid());
         // 清除验证码
-        if (StringUtils.isNotBlank(dto.getCode())){
+        if (StringUtils.isNotBlank(dto.getCode())) {
             redisManage.del(dto.getUuid());
         }
         if (StringUtils.isBlank(code)) {
@@ -235,44 +228,11 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
                 .eq(Operator::getAccount, account);
         Operator operator = getOne(lambdaQueryWrapper);
         AssertUtil.isNotNull(operator, "该用户不存在");
-
-
         OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
         List<Role> roleVoList = operatorRoleService.getEnableListByOperatorId(operator.getId());
         List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(Collectors.toList());
         Objects.requireNonNull(operatorVO).setRoles(roleKeyList);
         return operatorVO;
     }
-
-    @Override
-    public List<MenuTreeVO> getMenuTreeVoListByOperator(Long operatorId) {
-        List<Menu> menuList = getEnableMenuListByOperatorId(operatorId);
-        if (CollectionUtils.isEmpty(menuList)) {
-            return new ArrayList<>();
-        }
-        return TreeUtil.getMenuTreeVolist(menuList);
-    }
-
-    @Override
-    public List<MenuComponentVo> getMenuComponentTreeVoListByOperator(Long operatorId) {
-        List<Menu> menuList = getEnableMenuListByOperatorId(operatorId);
-        if (CollectionUtils.isEmpty(menuList)) {
-            return new ArrayList<>();
-        }
-        List<MenuTreeVO> menuTreeVOList = TreeUtil.buildMenuTree(menuList);
-        return TreeUtil.buildMenuComponents(menuTreeVOList);
-    }
-
-
-    @Override
-    public List<Menu> getEnableMenuListByOperatorId(Long operatorId) {
-        List<Role> roleList = operatorRoleService.getEnableListByOperatorId(operatorId);
-        if (CollectionUtils.isEmpty(roleList)) {
-            return new ArrayList<>();
-        }
-        List<Long> roleIdList = roleList.stream().map(Role::getId).collect(Collectors.toList());
-        return roleMenuService.getEnableMenuListByRoleIds(roleIdList);
-    }
-
 
 }

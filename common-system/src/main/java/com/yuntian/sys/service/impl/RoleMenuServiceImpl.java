@@ -126,6 +126,16 @@ public class RoleMenuServiceImpl extends BaseServiceImpl<RoleMenuMapper, RoleMen
         return page(page);
     }
 
+    @Override
+    public List<RoleMenu> getRoleMenuList(List<Long> roleIdList) {
+        if (CollectionUtils.isEmpty(roleIdList)) {
+            return new ArrayList<>();
+        }
+        LambdaQueryWrapper<RoleMenu> lambdaQueryWrapper = new QueryWrapper<RoleMenu>().lambda()
+                .in(RoleMenu::getRoleId, roleIdList);
+        return list(lambdaQueryWrapper);
+    }
+
 
     @Override
     public RoleMenu getById(Serializable id) {
