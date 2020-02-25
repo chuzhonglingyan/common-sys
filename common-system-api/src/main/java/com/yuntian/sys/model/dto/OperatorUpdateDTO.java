@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import java.io.Serializable;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.Data;
@@ -32,13 +33,14 @@ public class OperatorUpdateDTO extends BaseDTO implements Serializable {
     @Length(max = 50, message = "用户名最大50位")
     private String userName;
 
-    @Length(min = 6, max = 12, message = "密码长度必须在6位到12位之间")
-    private String passWord;
 
     @Email(message = "邮箱格式错误")
     private String email;
 
-
     private String phone;
+
+    private Integer sex;
+
+    private Integer isEnabled;
 
 }

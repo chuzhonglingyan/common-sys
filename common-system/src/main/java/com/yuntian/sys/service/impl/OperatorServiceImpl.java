@@ -21,9 +21,12 @@ import com.yuntian.sys.model.dto.OperatorSaveDTO;
 import com.yuntian.sys.model.dto.OperatorUpdateDTO;
 import com.yuntian.sys.model.dto.RegisterDTO;
 import com.yuntian.sys.model.entity.Operator;
+import com.yuntian.sys.model.entity.OperatorRole;
 import com.yuntian.sys.model.entity.Role;
+import com.yuntian.sys.model.entity.RoleMenu;
 import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.model.vo.PageVO;
+import com.yuntian.sys.model.vo.RoleVO;
 import com.yuntian.sys.service.OperatorRoleService;
 import com.yuntian.sys.service.OperatorService;
 
@@ -32,10 +35,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -92,20 +98,20 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
     @Override
     public void isEnable(Operator dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
-        dto.setIsEnable(EnabledEnum.DISENABLED.getType());
+        dto.setIsEnabled(EnabledEnum.DISENABLED.getType());
         UpdateWrapper<Operator> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("id", dto.getId());
-        updateWrapper.set("is_enable", EnabledEnum.ENABLED.getType());
+        updateWrapper.set("is_enabled", EnabledEnum.ENABLED.getType());
         update(dto, updateWrapper);
     }
 
     @Override
     public void isDisEnable(Operator dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
-        dto.setIsEnable(EnabledEnum.ENABLED.getType());
+        dto.setIsEnabled(EnabledEnum.ENABLED.getType());
         UpdateWrapper<Operator> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("id", dto.getId());
-        updateWrapper.set("is_enable", EnabledEnum.DISENABLED.getType());
+        updateWrapper.set("is_enabled", EnabledEnum.DISENABLED.getType());
         update(dto, updateWrapper);
     }
 
@@ -129,8 +135,25 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         AssertUtil.isNotNull(dto, "参数不能为空");
         IPage<Operator> pageParam = new Page<>(dto.getCurrent(), dto.getSize());
         LambdaQueryWrapper<Operator> queryWrapper = new LambdaQueryWrapper<>();
+        List<String> createTime=dto.getCreateTime();
+        if (!CollectionUtils.isEmpty(createTime)){
+            String createTimeStart=createTime.get(0);
+            String createTimeEnd=createTime.get(1);
+            queryWrapper.between(Operator::getCreateTime,createTimeStart,createTimeEnd);
+        }
+        queryWrapper.eq(Objects.nonNull(dto.getIsEnabled()),Operator::getIsEnabled,dto.getIsEnabled());
         queryWrapper.orderByDesc(Operator::getUpdateTime);
-        return new PageVO<OperatorVO>(page(pageParam,queryWrapper)){};
+
+        PageVO<OperatorVO> operatorVoPage=new PageVO<OperatorVO>(page(pageParam,queryWrapper)){};
+        List<OperatorVO> roleVoList=operatorVoPage.getRecords();
+        if (CollectionUtils.isEmpty(roleVoList)){
+            return operatorVoPage;
+        }
+        operatorVoPage.getRecords().forEach(vo -> {
+            List<Role>  roleList=operatorRoleService.getEnableListByOperatorId(vo.getId());
+            vo.setRoleList(roleList);
+        });
+        return operatorVoPage;
     }
 
 

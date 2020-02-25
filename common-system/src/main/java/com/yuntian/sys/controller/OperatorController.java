@@ -59,7 +59,7 @@ public class OperatorController extends BaseBackendController {
 
 
     @PostMapping("/update")
-    public Result update(OperatorUpdateDTO dto) {
+    public Result update(@RequestBody @Validated OperatorUpdateDTO dto) {
         dto.setCreateId(getUserId());
         dto.setUpdateId(getUserId());
         operatorService.updateByDTO(dto);

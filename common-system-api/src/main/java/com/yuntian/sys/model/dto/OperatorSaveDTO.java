@@ -28,12 +28,12 @@ public class OperatorSaveDTO extends BaseDTO implements Serializable {
 
 
     @NotBlank(message = "账号不能为空")
-    @Length(max = 50, message = "账号最大50位")
+    @Length(min = 2,max = 50, message = "账号最小2位,账号最大50位")
     private String account;
 
 
     @NotBlank(message = "用户名不能为空")
-    @Length(max = 50, message = "用户名最大50位")
+    @Length(min = 2,max = 50, message = "用户名最小2位,账号最大50位")
     private String userName;
 
     @NotBlank(message = "密码不能为空")

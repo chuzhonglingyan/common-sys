@@ -69,4 +69,10 @@ public class RoleController extends BaseBackendController {
         return ResultGenerator.genSuccessResult(roleService.queryListByPage(dto));
     }
 
+    @PostMapping("/getEnableList")
+    public Result getEnableList() {
+        return ResultGenerator.genSuccessResult(roleService.getEnableList());
+    }
+
+
 }

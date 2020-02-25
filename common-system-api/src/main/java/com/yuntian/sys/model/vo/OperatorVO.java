@@ -1,6 +1,7 @@
 package com.yuntian.sys.model.vo;
 
 import com.yuntian.sys.model.entity.Operator;
+import com.yuntian.sys.model.entity.Role;
 
 import java.util.List;
 
@@ -22,6 +23,8 @@ public class OperatorVO extends Operator {
     private String token;
 
     private List<String> roles;
+
+    private List<Role> roleList;
 
     private List<String> permissionList;
 

@@ -67,7 +67,7 @@ public class Operator extends BaseEntity {
     /**
     * 是否启用，0-禁用，1-启用，默认为0
     */
-    private Integer isEnable;
+    private Integer isEnabled;
 
     /**
     * 是否超级管理员，0-否，1-是，默认为0

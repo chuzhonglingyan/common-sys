@@ -1,6 +1,5 @@
 package com.yuntian.sys.common;
 
-import com.alibaba.fastjson.JSON;
 import com.yuntian.architecture.data.Result;
 import com.yuntian.architecture.data.ResultCode;
 import com.yuntian.architecture.data.ResultGenerator;
@@ -41,13 +40,14 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(value = BusinessException.class)
     public Result bussExceptionHandler(BusinessException e) {
         Result result = ResultGenerator.genFailResult(e.getCode(), e.getMessage());
-        log.error(JSON.toJSONString(result));
+        log.error(e.getMessage(), e);
         return result;
     }
 
 
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
     public Result handlerException(HttpMessageNotReadableException ex) {
+        log.error(ex.getMessage(), ex);
         return ResultGenerator.genFailResult(ResultCode.FAIL.code(), "请求失败,请传入参数");
     }
 
