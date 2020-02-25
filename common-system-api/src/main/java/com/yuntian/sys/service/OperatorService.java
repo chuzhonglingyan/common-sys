@@ -10,7 +10,7 @@ import com.yuntian.sys.model.entity.Operator;
 import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.model.vo.PageVO;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>
@@ -36,7 +36,7 @@ public interface OperatorService extends IBaseService<Operator> {
     PageVO<OperatorVO> queryListByPage(OperatorQueryDTO dto);
 
 
-    void deleteBatchByDTO(Collection<Operator> entityList);
+    void deleteBatchByDTO(Long operatorId, List<Long> idList);
 
     OperatorVO login(LoginDTO dto);
 
@@ -47,5 +47,6 @@ public interface OperatorService extends IBaseService<Operator> {
     OperatorVO getInfo(Long userId);
 
     OperatorVO getInfo(String account);
+
 
 }

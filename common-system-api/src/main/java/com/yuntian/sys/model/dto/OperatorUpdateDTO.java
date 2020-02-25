@@ -5,9 +5,9 @@ import com.yuntian.architecture.data.BaseDTO;
 import org.hibernate.validator.constraints.Length;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.Data;
@@ -42,5 +42,7 @@ public class OperatorUpdateDTO extends BaseDTO implements Serializable {
     private Integer sex;
 
     private Integer isEnabled;
+
+    private List<Long> roleIdList;
 
 }

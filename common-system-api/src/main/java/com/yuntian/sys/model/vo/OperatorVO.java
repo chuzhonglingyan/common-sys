@@ -1,7 +1,6 @@
 package com.yuntian.sys.model.vo;
 
 import com.yuntian.sys.model.entity.Operator;
-import com.yuntian.sys.model.entity.Role;
 
 import java.util.List;
 
@@ -24,13 +23,17 @@ public class OperatorVO extends Operator {
 
     private List<String> roles;
 
-    private List<Role> roleList;
+    private List<Long> roleIdList;
 
     private List<String> permissionList;
 
     private String dept;
 
     private String sexText;
+
+    private String createName;
+
+    private String updateName;
 
     public String getSexText() {
         return getSex()==0?"男":"女";

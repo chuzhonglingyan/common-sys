@@ -110,35 +110,39 @@ public class OperatorRoleServiceImpl extends BaseServiceImpl<OperatorRoleMapper,
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveRoleListByOperatorId(OperatorRoleDTO dto) {
-        AssertUtil.isNotNull(dto, "参数不能为空");
         AssertUtil.isNotNull(dto.getOperaterId(), "用户id不能为空");
+        saveRoleListByOperatorId(dto.getOperaterId(),dto.getRoleList());
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveRoleListByOperatorId(Long operatorId,List<Long> roleIdList) {
         //删除原先的关联关系
-        deleteOperatorId(dto.getOperaterId());
-        List<Long> list = dto.getRoleList();
-        if (CollectionUtils.isEmpty(list)) {
+        deleteByOperatorId(operatorId);
+        if (CollectionUtils.isEmpty(roleIdList)) {
             BusinessException.throwMessage("请选择角色");
         }
         List<OperatorRole> operatorRoleList = new ArrayList<>();
-        for (Long roleId : list) {
+        for (Long roleId : roleIdList) {
             OperatorRole operatorRole = new OperatorRole();
-            operatorRole.setUserId(dto.getOperaterId());
+            operatorRole.setUserId(operatorId);
             operatorRole.setRoleId(roleId);
-            operatorRole.setCreateId(dto.getCreateId());
-            operatorRole.setUpdateId(dto.getUpdateId());
+            operatorRole.setCreateId(operatorId);
+            operatorRole.setUpdateId(operatorId);
             operatorRoleList.add(operatorRole);
         }
         saveBatch(operatorRoleList);
     }
 
-    public void deleteOperatorId(Long operatorId) {
+    @Override
+    public void deleteByOperatorId(Long operatorId) {
         Map<String, Object> map = new HashMap<>();
         map.put("user_id", operatorId);
         removeByMap(map);
     }
-
 
     @Override
     public List<Long> getRoleIdListByOperatorId(Long operatorId) {

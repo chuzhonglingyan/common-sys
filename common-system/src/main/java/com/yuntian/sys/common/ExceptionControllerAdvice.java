@@ -52,6 +52,13 @@ public class ExceptionControllerAdvice {
     }
 
 
+    @ExceptionHandler(value = NumberFormatException.class)
+    public Result handlerException(NumberFormatException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResultGenerator.genFailResult(ResultCode.FAIL.code(),ex.getMessage());
+    }
+
+
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public Result handlerException(MethodArgumentNotValidException ex) {
         log.error(ex.getMessage(), ex);

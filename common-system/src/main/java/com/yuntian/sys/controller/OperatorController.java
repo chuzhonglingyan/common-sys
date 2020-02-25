@@ -50,7 +50,7 @@ public class OperatorController extends BaseBackendController {
 
 
     @PostMapping("/save")
-    public Result save(OperatorSaveDTO dto) {
+    public Result save(@RequestBody @Validated OperatorSaveDTO dto) {
         dto.setCreateId(getUserId());
         dto.setUpdateId(getUserId());
         operatorService.saveByDTO(dto);
@@ -74,6 +74,13 @@ public class OperatorController extends BaseBackendController {
         return ResultGenerator.genSuccessResult();
     }
 
+
+
+    @PostMapping("/deleteList")
+    public Result deleteList(@RequestBody List<Long> idList) {
+        operatorService.deleteBatchByDTO(getUserId(),idList);
+        return ResultGenerator.genSuccessResult();
+    }
 
     @PostMapping("/detail")
     public Result detail() {

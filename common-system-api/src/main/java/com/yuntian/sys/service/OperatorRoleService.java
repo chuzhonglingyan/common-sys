@@ -2,14 +2,13 @@ package com.yuntian.sys.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuntian.architecture.data.IBaseService;
-
-import java.util.Collection;
-import java.util.List;
-
 import com.yuntian.sys.model.dto.OperatorRoleDTO;
 import com.yuntian.sys.model.entity.OperatorRole;
 import com.yuntian.sys.model.entity.Role;
 import com.yuntian.sys.model.vo.RoleVO;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>
@@ -46,5 +45,10 @@ public interface OperatorRoleService extends IBaseService<OperatorRole> {
    void deleteBatchByDTO(Collection<OperatorRole> entityList);
 
    void saveRoleListByOperatorId(OperatorRoleDTO dto);
+
+   void saveRoleListByOperatorId(Long operatorId,List<Long> roleIdList);
+
+   void deleteByOperatorId(Long operatorId);
+
 
 }

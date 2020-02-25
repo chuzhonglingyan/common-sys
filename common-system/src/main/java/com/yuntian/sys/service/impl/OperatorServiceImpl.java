@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.yuntian.architecture.data.BaseEntity;
 import com.yuntian.architecture.data.BaseServiceImpl;
 import com.yuntian.architecture.data.exception.BusinessException;
 import com.yuntian.architecture.data.util.AssertUtil;
@@ -21,12 +23,9 @@ import com.yuntian.sys.model.dto.OperatorSaveDTO;
 import com.yuntian.sys.model.dto.OperatorUpdateDTO;
 import com.yuntian.sys.model.dto.RegisterDTO;
 import com.yuntian.sys.model.entity.Operator;
-import com.yuntian.sys.model.entity.OperatorRole;
 import com.yuntian.sys.model.entity.Role;
-import com.yuntian.sys.model.entity.RoleMenu;
 import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.model.vo.PageVO;
-import com.yuntian.sys.model.vo.RoleVO;
 import com.yuntian.sys.service.OperatorRoleService;
 import com.yuntian.sys.service.OperatorService;
 
@@ -35,20 +34,25 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * <p>
@@ -72,28 +76,62 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
     @Resource
     private OperatorRoleService operatorRoleService;
 
-
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveByDTO(OperatorSaveDTO dto) {
         Operator operator = BeanCopyUtil.copyProperties(dto, Operator.class);
-        boolean flag = save(operator);
+        operator.setPassWord(PasswordUtil.md5HexWithSalt("123456"));
+        boolean flag = false;
+        try {
+            flag = save(operator);
+        } catch (DuplicateKeyException e) {
+            BusinessException.throwMessage("账号名已存在");
+        }
         AssertUtil.isNotTrue(flag, "保存失败");
+        List<Long> roleIdList=dto.getRoleIdList();
+        if (CollectionUtils.isNotEmpty(roleIdList)) {
+            operatorRoleService.saveRoleListByOperatorId(operator.getId(),roleIdList);
+        }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateByDTO(OperatorUpdateDTO dto) {
         getById(dto.getId());
         Operator operator = BeanCopyUtil.copyProperties(dto, Operator.class);
         boolean flag = updateById(operator);
         AssertUtil.isNotTrue(flag, "更新失败");
+        List<Long> roleIdList=dto.getRoleIdList();
+        if (CollectionUtils.isNotEmpty(roleIdList)) {
+            operatorRoleService.saveRoleListByOperatorId(operator.getId(),roleIdList);
+        }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteByDTO(Operator dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
         boolean flag = deleteByIdWithFill(dto);
+        operatorRoleService.deleteByOperatorId(dto.getId());
         AssertUtil.isNotTrue(flag, "删除失败,请刷新重试");
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteBatchByDTO(Long operatorId,List<Long> idList) {
+        AssertUtil.isNotEmpty(idList, "集合不能为空");
+        Collection<Operator> entityList=new ArrayList<>();
+        idList.forEach(id -> {
+            Operator operator=new Operator();
+            operator.setId(id);
+            operator.setUpdateId(operatorId);
+            entityList.add(operator);
+        });
+        boolean flag = deleteByIdsWithFill(entityList);
+        AssertUtil.isNotTrue(flag, "删除失败,请刷新重试");
+    }
+
+
 
     @Override
     public void isEnable(Operator dto) {
@@ -124,11 +162,6 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
     }
 
 
-    @Override
-    public void deleteBatchByDTO(Collection<Operator> entityList) {
-
-    }
-
 
     @Override
     public PageVO<OperatorVO> queryListByPage(OperatorQueryDTO dto) {
@@ -145,15 +178,46 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         queryWrapper.orderByDesc(Operator::getUpdateTime);
 
         PageVO<OperatorVO> operatorVoPage=new PageVO<OperatorVO>(page(pageParam,queryWrapper)){};
-        List<OperatorVO> roleVoList=operatorVoPage.getRecords();
-        if (CollectionUtils.isEmpty(roleVoList)){
+        List<OperatorVO> operatorVoList=operatorVoPage.getRecords();
+        if (CollectionUtils.isEmpty(operatorVoList)){
             return operatorVoPage;
         }
+        Map<Long, String> operatorNameMap=getOperatorNameMap(operatorVoList);
         operatorVoPage.getRecords().forEach(vo -> {
-            List<Role>  roleList=operatorRoleService.getEnableListByOperatorId(vo.getId());
-            vo.setRoleList(roleList);
+            List<Long>  roleIdList=operatorRoleService.getRoleIdListByOperatorId(vo.getId());
+            vo.setRoleIdList(roleIdList);
+            vo.setCreateName(operatorNameMap.get(vo.getCreateId()));
+            vo.setUpdateName(operatorNameMap.get(vo.getUpdateId()));
         });
         return operatorVoPage;
+    }
+
+    public <T extends BaseEntity> Map<Long, Operator> getOperatorMap(List<T> voList){
+        Set<Long> createIdList=voList.stream().map(T::getCreateId).collect(Collectors.toSet());
+        Set<Long> updateIdList=voList.stream().map(T::getUpdateId).collect(Collectors.toSet());
+        List<Long> listAll=new ArrayList<>();
+        listAll.addAll(createIdList);
+        listAll.addAll(updateIdList);
+        List<Long> listAllDistinct = listAll.stream().distinct().collect(toList());
+        if (CollectionUtils.isEmpty(listAllDistinct)){
+            return new HashMap<>();
+        }
+        List<Operator> operatorList=listByIds(listAllDistinct);
+        return operatorList.stream().collect(Collectors.toMap(Operator::getId, Function.identity(), (key1, key2) -> key2));
+    }
+
+    public <T extends BaseEntity> Map<Long, String> getOperatorNameMap(List<T> voList){
+        Set<Long> createIdList=voList.stream().map(T::getCreateId).collect(Collectors.toSet());
+        Set<Long> updateIdList=voList.stream().map(T::getUpdateId).collect(Collectors.toSet());
+        List<Long> listAll=new ArrayList<>();
+        listAll.addAll(createIdList);
+        listAll.addAll(updateIdList);
+        List<Long> listAllDistinct = listAll.stream().distinct().collect(toList());
+        if (CollectionUtils.isEmpty(listAllDistinct)){
+            return new HashMap<>();
+        }
+        List<Operator> operatorList=listByIds(listAllDistinct);
+        return operatorList.stream().collect(Collectors.toMap(Operator::getId, Operator::getUserName, (key1, key2) -> key2));
     }
 
 
@@ -240,7 +304,7 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         Operator operator = getById(userId);
         OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
         List<Role> roleVoList = operatorRoleService.getEnableListByOperatorId(userId);
-        List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(Collectors.toList());
+        List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(toList());
         Objects.requireNonNull(operatorVO).setRoles(roleKeyList);
         return operatorVO;
     }
@@ -253,9 +317,10 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         AssertUtil.isNotNull(operator, "该用户不存在");
         OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
         List<Role> roleVoList = operatorRoleService.getEnableListByOperatorId(operator.getId());
-        List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(Collectors.toList());
+        List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(toList());
         Objects.requireNonNull(operatorVO).setRoles(roleKeyList);
         return operatorVO;
     }
+
 
 }
