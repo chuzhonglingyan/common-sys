@@ -24,10 +24,6 @@ import lombok.EqualsAndHashCode;
 public class RegisterDTO extends BaseDTO implements Serializable {
 
 
-    @NotBlank(message = "账号不能为空,长度必须大于0")
-    @Length(max = 50, message = "账号最大50位")
-    private String account;
-
 
     @NotBlank(message = "用户名不能为null,长度必须大于0")
     @Length(max = 50, message = "用户名最大50位")

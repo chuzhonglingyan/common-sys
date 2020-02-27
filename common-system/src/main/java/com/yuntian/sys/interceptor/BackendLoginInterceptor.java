@@ -1,6 +1,7 @@
 package com.yuntian.sys.interceptor;
 
 
+import com.yuntian.architecture.data.ResultCode;
 import com.yuntian.architecture.data.exception.BusinessException;
 import com.yuntian.architecture.redis.config.RedisManage;
 import com.yuntian.sys.common.constant.RedisKey;
@@ -26,7 +27,7 @@ public class BackendLoginInterceptor implements HandlerInterceptor {
 
 
     public final static String ACCESS_TOKEN = "X-Token";
-    private final static int NOVALID_TOKEN_CODE = 401;
+    private final static int NOVALID_TOKEN_CODE = ResultCode.UN_LOGIN.code();
 
     @Resource
     private RedisManage redisManage;

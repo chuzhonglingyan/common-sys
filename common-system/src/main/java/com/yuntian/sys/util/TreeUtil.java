@@ -1,6 +1,7 @@
 package com.yuntian.sys.util;
 
 import com.yuntian.architecture.util.BeanCopyUtil;
+import com.yuntian.sys.common.dict.VisibleEnum;
 import com.yuntian.sys.model.entity.Menu;
 import com.yuntian.sys.model.vo.MenuComponentVo;
 import com.yuntian.sys.model.vo.MenuMetaVo;
@@ -132,9 +133,9 @@ public class TreeUtil {
                         menuComponentVo.setName(ObjectUtil.isNotEmpty(menuTreeVO.getComponentName()) ? menuTreeVO.getComponentName() : menuTreeVO.getName());
                         // 一级目录需要加斜杠，不然会报警告
                         menuComponentVo.setPath(menuTreeVO.getPid() == 0 ? "/" + menuTreeVO.getPath() : menuTreeVO.getPath());
-                        menuComponentVo.setHidden(menuTreeVO.getStatus()==0);
+                        menuComponentVo.setHidden(menuTreeVO.getVisible()== VisibleEnum.HIDDEN.getValue());
                         // 如果不是外链
-                        if (menuTreeVO.getIFrame() == 0) {
+                        if (menuTreeVO.getIsLinked() == 0) {
                             if (menuTreeVO.getPid() == 0) {
                                 menuComponentVo.setComponent(StrUtil.isEmpty(menuTreeVO.getComponent()) ? "Layout" : menuTreeVO.getComponent());
                             } else if (!StrUtil.isEmpty(menuTreeVO.getComponent())) {
@@ -151,7 +152,7 @@ public class TreeUtil {
                             MenuComponentVo menuComponentVo1 = new MenuComponentVo();
                             menuComponentVo1.setMeta(menuComponentVo.getMeta());
                             // 非外链
-                            if (menuTreeVO.getIFrame() == 0) {
+                            if (menuTreeVO.getIsLinked() == 0) {
                                 menuComponentVo1.setPath("index");
                                 menuComponentVo1.setName(menuComponentVo.getName());
                                 menuComponentVo1.setComponent(menuComponentVo.getComponent());

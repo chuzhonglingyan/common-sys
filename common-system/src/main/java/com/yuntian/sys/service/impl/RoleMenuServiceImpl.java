@@ -9,10 +9,17 @@ import com.yuntian.architecture.data.exception.BusinessException;
 import com.yuntian.architecture.data.util.AssertUtil;
 import com.yuntian.architecture.util.BeanCopyUtil;
 import com.yuntian.sys.mapper.RoleMenuMapper;
+import com.yuntian.sys.model.dto.RoleMenuDTO;
+import com.yuntian.sys.model.entity.Menu;
+import com.yuntian.sys.model.entity.RoleMenu;
+import com.yuntian.sys.model.vo.MenuVO;
+import com.yuntian.sys.service.MenuService;
+import com.yuntian.sys.service.RoleMenuService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,13 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.annotation.Resource;
-import com.yuntian.sys.model.dto.RoleMenuDTO;
-import com.yuntian.sys.model.entity.Menu;
-import com.yuntian.sys.model.entity.RoleMenu;
-import com.yuntian.sys.model.vo.MenuVO;
-import com.yuntian.sys.service.MenuService;
-import com.yuntian.sys.service.RoleMenuService;
 
 /**
  * <p>
@@ -92,32 +94,7 @@ public class RoleMenuServiceImpl extends BaseServiceImpl<RoleMenuMapper, RoleMen
         return menuService.getEnableMenuList(menuIdList);
     }
 
-    /**
-     * 保存角色选择的菜单
-     *
-     * @param roleMenuDTO
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void saveMenuListByRoleId(RoleMenuDTO roleMenuDTO) {
-        AssertUtil.isNotNull(roleMenuDTO, "参数不能为空");
-        AssertUtil.isNotNull(roleMenuDTO.getRoleId(), "角色id不能为空");
-        AssertUtil.isNotNull(roleMenuDTO.getMenuIdList(), "选择菜单不能为空");
-        //删除原先的关联关系
-        deleteByRoleId(roleMenuDTO.getRoleId());
-        List<Long> list = roleMenuDTO.getMenuIdList();
-        List<RoleMenu> roleMenuList = new ArrayList<>();
-        for (Long menuId : list) {
-            RoleMenu roleMenu = new RoleMenu();
-            roleMenu.setRoleId(roleMenuDTO.getRoleId());
-            roleMenu.setMenuId(menuId);
-            roleMenu.setIsChecked(1);
-            roleMenu.setCreateId(roleMenuDTO.getCreateId());
-            roleMenu.setUpdateId(roleMenuDTO.getUpdateId());
-            roleMenuList.add(roleMenu);
-        }
-        saveBatch(roleMenuList);
-    }
+
 
     @Override
     public IPage<RoleMenu> queryListByPage(RoleMenuDTO dto) {
@@ -197,9 +174,9 @@ public class RoleMenuServiceImpl extends BaseServiceImpl<RoleMenuMapper, RoleMen
 
     @Override
     public List<Long> getMenuIdListByRoleId(Long roleId) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("role_id", roleId);
-        List<RoleMenu> list = super.listByMap(map);
+        LambdaQueryWrapper<RoleMenu> lambdaQueryWrapper = new QueryWrapper<RoleMenu>().lambda()
+                .eq(RoleMenu::getRoleId, roleId);
+        List<RoleMenu> list = super.list(lambdaQueryWrapper);
         if (CollectionUtils.isEmpty(list)) {
             return new ArrayList<>();
         }
@@ -215,6 +192,30 @@ public class RoleMenuServiceImpl extends BaseServiceImpl<RoleMenuMapper, RoleMen
             return new ArrayList<>();
         }
         return list.stream().map(RoleMenu::getMenuId).distinct().collect(Collectors.toList());
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveMenuListByRoleId(RoleMenuDTO roleMenuDTO) {
+        AssertUtil.isNotNull(roleMenuDTO, "参数不能为空");
+        AssertUtil.isNotNull(roleMenuDTO.getRoleId(), "角色id不能为空");
+        List<Long> menuList = roleMenuDTO.getMenuIdList();
+        if (CollectionUtils.isEmpty(menuList)) {
+            BusinessException.throwMessage("请选择菜单");
+        }
+        //删除原先的关联关系
+        deleteByRoleId(roleMenuDTO.getRoleId());
+        List<RoleMenu> roleMenuList = new ArrayList<>();
+        for (Long  menuId : menuList) {
+            RoleMenu roleMenu = new RoleMenu();
+            roleMenu.setRoleId(roleMenuDTO.getRoleId());
+            roleMenu.setMenuId(menuId);
+            roleMenu.setCreateId(roleMenuDTO.getCreateId());
+            roleMenu.setUpdateId(roleMenuDTO.getCreateId());
+            roleMenuList.add(roleMenu);
+        }
+        saveBatch(roleMenuList);
     }
 
 

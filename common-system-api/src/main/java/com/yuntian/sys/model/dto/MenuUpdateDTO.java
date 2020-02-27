@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.Data;
@@ -28,20 +29,37 @@ public class MenuUpdateDTO extends BaseDTO implements Serializable {
     @NotNull(message = "id不能为空")
     private Long id;
 
+
+    @NotBlank(message = "菜单名称不能为空")
     @Length(max = 50, message = "菜单名称最大50位")
-    private String menuName;
+    private String name;
 
 
-    @Length(max = 500, message = "菜单url最大500位")
-    private String menuUrl;
+    @Length(max = 500, message = "菜单路径最大500位")
+    private String path;
 
-    @Length(max = 500, message = "菜单权限code最大500位")
-    private String menuCode;
 
-    private Integer menuType;
+    @NotNull(message = "菜单类型不能为空")
+    private Integer type;
 
-    private Integer menuLevel;
+    private Integer level;
 
     private Integer sort;
+
+    private String component;
+
+
+    private String componentName;
+
+    private String icon;
+
+    private Integer visible;
+
+    private Integer cache;
+
+    private Integer isLinked;
+
+    @Length(max = 500, message = "菜单权限最大500位")
+    private String permission;
 
 }

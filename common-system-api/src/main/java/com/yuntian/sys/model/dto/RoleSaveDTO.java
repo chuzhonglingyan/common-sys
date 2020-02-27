@@ -28,11 +28,19 @@ public class RoleSaveDTO extends BaseDTO implements Serializable {
 
     @NotBlank(message = "角色key不能为空")
     @Length(max = 100, message = "角色key最大100位")
-    private String key;
+    private String roleKey;
 
 
     @NotBlank(message = "角色名称不能为空")
     @Length(max = 50, message = "角色名称最大50位")
     private String name;
+
+    private Integer status;
+
+    private Integer level;
+
+    private String remark;
+
+
 
 }

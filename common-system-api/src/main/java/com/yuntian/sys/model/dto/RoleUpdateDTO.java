@@ -30,6 +30,12 @@ public class RoleUpdateDTO extends BaseDTO implements Serializable {
     private Long id;
 
     @Length(max = 50, message = "角色名称最大50位")
-    private String roleName;
+    private String name;
+
+    private Integer status;
+
+    private Integer level;
+
+    private String remark;
 
 }

@@ -21,7 +21,7 @@ public class LoginDTO extends BaseDTO implements Serializable {
 
     @NotBlank(message = "账号不能为空,长度必须大于0")
     @Length(max = 50, message = "账号最大50位")
-    private String account;
+    private String userName;
 
 
     @NotBlank(message = "密码不能为空")

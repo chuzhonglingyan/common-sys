@@ -46,7 +46,7 @@ public class Menu extends BaseEntity {
     /**
     * 授权(多个用逗号分隔，如：user:list,user:add)
     */
-    private String permissionCode;
+    private String permission;
 
     /**
     * 菜单类型，0：根目录,1：菜单，2：操作
@@ -57,6 +57,12 @@ public class Menu extends BaseEntity {
     * 0：禁用  1：启用
     */
     private Integer status;
+
+
+    /**
+     * 0：隐藏  1：可见
+     */
+    private Integer visible;
 
     /**
     * 排序
@@ -73,7 +79,7 @@ public class Menu extends BaseEntity {
 
     private Integer cache;
 
-    private Integer iFrame;
+    private Integer isLinked;
 
     /**
     * 是否删除，0-未删除，1-删除，默认为0

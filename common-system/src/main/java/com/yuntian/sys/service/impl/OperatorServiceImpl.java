@@ -2,7 +2,6 @@ package com.yuntian.sys.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -17,15 +16,18 @@ import com.yuntian.architecture.util.TokenUtil;
 import com.yuntian.sys.common.constant.RedisKey;
 import com.yuntian.sys.common.dict.EnabledEnum;
 import com.yuntian.sys.mapper.OperatorMapper;
+import com.yuntian.sys.model.dto.DownQueryDTO;
 import com.yuntian.sys.model.dto.LoginDTO;
 import com.yuntian.sys.model.dto.OperatorQueryDTO;
 import com.yuntian.sys.model.dto.OperatorSaveDTO;
 import com.yuntian.sys.model.dto.OperatorUpdateDTO;
 import com.yuntian.sys.model.dto.RegisterDTO;
+import com.yuntian.sys.model.entity.Menu;
 import com.yuntian.sys.model.entity.Operator;
 import com.yuntian.sys.model.entity.Role;
 import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.model.vo.PageVO;
+import com.yuntian.sys.service.MenuService;
 import com.yuntian.sys.service.OperatorRoleService;
 import com.yuntian.sys.service.OperatorService;
 
@@ -40,18 +42,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
-
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
-
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -76,6 +76,10 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
     @Resource
     private OperatorRoleService operatorRoleService;
 
+    @Resource
+    private MenuService menuService;
+
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveByDTO(OperatorSaveDTO dto) {
@@ -85,12 +89,12 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         try {
             flag = save(operator);
         } catch (DuplicateKeyException e) {
-            BusinessException.throwMessage("账号名已存在");
+            BusinessException.throwMessage("用户名已存在");
         }
         AssertUtil.isNotTrue(flag, "保存失败");
-        List<Long> roleIdList=dto.getRoleIdList();
+        List<Long> roleIdList = dto.getRoleIdList();
         if (CollectionUtils.isNotEmpty(roleIdList)) {
-            operatorRoleService.saveRoleListByOperatorId(operator.getId(),roleIdList);
+            operatorRoleService.saveRoleListByOperatorId(operator.getId(), roleIdList);
         }
     }
 
@@ -101,16 +105,18 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         Operator operator = BeanCopyUtil.copyProperties(dto, Operator.class);
         boolean flag = updateById(operator);
         AssertUtil.isNotTrue(flag, "更新失败");
-        List<Long> roleIdList=dto.getRoleIdList();
-        if (CollectionUtils.isNotEmpty(roleIdList)) {
-            operatorRoleService.saveRoleListByOperatorId(operator.getId(),roleIdList);
-        }
+        List<Long> roleIdList = dto.getRoleIdList();
+        operatorRoleService.saveRoleListByOperatorId(operator.getId(), roleIdList);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteByDTO(Operator dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
+        Operator operatorTemp = getById(dto.getId());
+        if (operatorTemp.getStatus() == EnabledEnum.ENABLED.getValue()) {
+            BusinessException.throwMessage("用户处于启用状态，无法删除.");
+        }
         boolean flag = deleteByIdWithFill(dto);
         operatorRoleService.deleteByOperatorId(dto.getId());
         AssertUtil.isNotTrue(flag, "删除失败,请刷新重试");
@@ -118,11 +124,17 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteBatchByDTO(Long operatorId,List<Long> idList) {
+    public void deleteBatchByDTO(Long operatorId, List<Long> idList) {
         AssertUtil.isNotEmpty(idList, "集合不能为空");
-        Collection<Operator> entityList=new ArrayList<>();
+        Collection<Operator> entityList = new ArrayList<>();
         idList.forEach(id -> {
-            Operator operator=new Operator();
+            Operator operatorTemp = getById(id);
+            if (operatorTemp.getStatus() == EnabledEnum.ENABLED.getValue()) {
+                BusinessException.throwMessage("用户处于启用状态，无法删除.");
+            }
+            operatorRoleService.deleteByOperatorId(id);
+
+            Operator operator = new Operator();
             operator.setId(id);
             operator.setUpdateId(operatorId);
             entityList.add(operator);
@@ -132,25 +144,37 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
     }
 
 
-
     @Override
-    public void isEnable(Operator dto) {
+    public void enable(Operator dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
-        dto.setIsEnabled(EnabledEnum.DISENABLED.getType());
-        UpdateWrapper<Operator> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("id", dto.getId());
-        updateWrapper.set("is_enabled", EnabledEnum.ENABLED.getType());
-        update(dto, updateWrapper);
+        dto.setStatus(EnabledEnum.ENABLED.getValue());
+        LambdaQueryWrapper<Operator> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(Operator::getId, dto.getId());
+        updateWrapper.eq(Operator::getStatus, EnabledEnum.DISENABLED.getValue());
+        boolean flag = update(dto, updateWrapper);
+        AssertUtil.isNotTrue(flag, "启用失败,请刷新页面");
     }
 
     @Override
-    public void isDisEnable(Operator dto) {
+    public void disEnable(Operator dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
-        dto.setIsEnabled(EnabledEnum.ENABLED.getType());
-        UpdateWrapper<Operator> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("id", dto.getId());
-        updateWrapper.set("is_enabled", EnabledEnum.DISENABLED.getType());
-        update(dto, updateWrapper);
+        dto.setStatus(EnabledEnum.DISENABLED.getValue());
+        LambdaQueryWrapper<Operator> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(Operator::getId, dto.getId());
+        updateWrapper.eq(Operator::getStatus, EnabledEnum.ENABLED.getValue());
+        boolean flag = update(dto, updateWrapper);
+        AssertUtil.isNotTrue(flag, "禁用失败,请刷新页面");
+    }
+
+    @Override
+    public void changeState(Operator dto) {
+        AssertUtil.isNotNull(dto.getId(), "id不能为空");
+        AssertUtil.isNotNull(dto.getStatus(), "状态不能为空");
+        if (dto.getStatus() == 0) {
+            enable(dto);
+        } else {
+            disEnable(dto);
+        }
     }
 
 
@@ -162,29 +186,29 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
     }
 
 
-
     @Override
     public PageVO<OperatorVO> queryListByPage(OperatorQueryDTO dto) {
         AssertUtil.isNotNull(dto, "参数不能为空");
         IPage<Operator> pageParam = new Page<>(dto.getCurrent(), dto.getSize());
         LambdaQueryWrapper<Operator> queryWrapper = new LambdaQueryWrapper<>();
-        List<String> createTime=dto.getCreateTime();
-        if (!CollectionUtils.isEmpty(createTime)){
-            String createTimeStart=createTime.get(0);
-            String createTimeEnd=createTime.get(1);
-            queryWrapper.between(Operator::getCreateTime,createTimeStart,createTimeEnd);
+        List<String> createTime = dto.getCreateTime();
+        if (!CollectionUtils.isEmpty(createTime)) {
+            String createTimeStart = createTime.get(0);
+            String createTimeEnd = createTime.get(1);
+            queryWrapper.between(Operator::getCreateTime, createTimeStart, createTimeEnd);
         }
-        queryWrapper.eq(Objects.nonNull(dto.getIsEnabled()),Operator::getIsEnabled,dto.getIsEnabled());
+        queryWrapper.eq(Objects.nonNull(dto.getIsEnabled()), Operator::getStatus, dto.getIsEnabled());
         queryWrapper.orderByDesc(Operator::getUpdateTime);
 
-        PageVO<OperatorVO> operatorVoPage=new PageVO<OperatorVO>(page(pageParam,queryWrapper)){};
-        List<OperatorVO> operatorVoList=operatorVoPage.getRecords();
-        if (CollectionUtils.isEmpty(operatorVoList)){
+        PageVO<OperatorVO> operatorVoPage = new PageVO<OperatorVO>(page(pageParam, queryWrapper)) {
+        };
+        List<OperatorVO> operatorVoList = operatorVoPage.getRecords();
+        if (CollectionUtils.isEmpty(operatorVoList)) {
             return operatorVoPage;
         }
-        Map<Long, String> operatorNameMap=getOperatorNameMap(operatorVoList);
+        Map<Long, String> operatorNameMap = getOperatorNameMap(operatorVoList);
         operatorVoPage.getRecords().forEach(vo -> {
-            List<Long>  roleIdList=operatorRoleService.getRoleIdListByOperatorId(vo.getId());
+            List<Long> roleIdList = operatorRoleService.getRoleIdListByOperatorId(vo.getId());
             vo.setRoleIdList(roleIdList);
             vo.setCreateName(operatorNameMap.get(vo.getCreateId()));
             vo.setUpdateName(operatorNameMap.get(vo.getUpdateId()));
@@ -192,31 +216,31 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         return operatorVoPage;
     }
 
-    public <T extends BaseEntity> Map<Long, Operator> getOperatorMap(List<T> voList){
-        Set<Long> createIdList=voList.stream().map(T::getCreateId).collect(Collectors.toSet());
-        Set<Long> updateIdList=voList.stream().map(T::getUpdateId).collect(Collectors.toSet());
-        List<Long> listAll=new ArrayList<>();
+    public <T extends BaseEntity> Map<Long, Operator> getOperatorMap(List<T> voList) {
+        Set<Long> createIdList = voList.stream().map(T::getCreateId).collect(Collectors.toSet());
+        Set<Long> updateIdList = voList.stream().map(T::getUpdateId).collect(Collectors.toSet());
+        List<Long> listAll = new ArrayList<>();
         listAll.addAll(createIdList);
         listAll.addAll(updateIdList);
         List<Long> listAllDistinct = listAll.stream().distinct().collect(toList());
-        if (CollectionUtils.isEmpty(listAllDistinct)){
+        if (CollectionUtils.isEmpty(listAllDistinct)) {
             return new HashMap<>();
         }
-        List<Operator> operatorList=listByIds(listAllDistinct);
+        List<Operator> operatorList = listByIds(listAllDistinct);
         return operatorList.stream().collect(Collectors.toMap(Operator::getId, Function.identity(), (key1, key2) -> key2));
     }
 
-    public <T extends BaseEntity> Map<Long, String> getOperatorNameMap(List<T> voList){
-        Set<Long> createIdList=voList.stream().map(T::getCreateId).collect(Collectors.toSet());
-        Set<Long> updateIdList=voList.stream().map(T::getUpdateId).collect(Collectors.toSet());
-        List<Long> listAll=new ArrayList<>();
+    public <T extends BaseEntity> Map<Long, String> getOperatorNameMap(List<T> voList) {
+        Set<Long> createIdList = voList.stream().map(T::getCreateId).collect(Collectors.toSet());
+        Set<Long> updateIdList = voList.stream().map(T::getUpdateId).collect(Collectors.toSet());
+        List<Long> listAll = new ArrayList<>();
         listAll.addAll(createIdList);
         listAll.addAll(updateIdList);
         List<Long> listAllDistinct = listAll.stream().distinct().collect(toList());
-        if (CollectionUtils.isEmpty(listAllDistinct)){
+        if (CollectionUtils.isEmpty(listAllDistinct)) {
             return new HashMap<>();
         }
-        List<Operator> operatorList=listByIds(listAllDistinct);
+        List<Operator> operatorList = listByIds(listAllDistinct);
         return operatorList.stream().collect(Collectors.toMap(Operator::getId, Operator::getUserName, (key1, key2) -> key2));
     }
 
@@ -228,7 +252,7 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
      */
     @Override
     public OperatorVO login(LoginDTO dto) {
-        AssertUtil.isNotBlank(dto.getAccount(), "账号名不能为空");
+        AssertUtil.isNotBlank(dto.getUserName(), "账号名不能为空");
         AssertUtil.isNotBlank(dto.getPassWord(), "密码不能为空");
         // 查询验证码
         String code = redisManage.getValue(dto.getUuid());
@@ -250,7 +274,7 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         } catch (Exception e) {
             BusinessException.throwMessage("密码解密错误");
         }
-        OperatorVO operatorVO = getInfo(dto.getAccount());
+        OperatorVO operatorVO = getInfo(dto.getUserName());
         AssertUtil.isNotTrue(PasswordUtil.verify(password, operatorVO.getPassWord()), "密码错误");
         String tokenKey = RedisKey.getBackendTokenkey(String.valueOf(operatorVO.getId()));
 
@@ -286,16 +310,16 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         if (!flag) {
             BusinessException.throwMessage("注册失败，请重新注册");
         }
-        Operator operator = getUserByAccount(dto.getAccount());
+        Operator operator = getUserByName(dto.getUserName());
         operator.setPassWord(null);
         return operator;
     }
 
 
     @Override
-    public Operator getUserByAccount(String account) {
+    public Operator getUserByName(String userName) {
         LambdaQueryWrapper<Operator> queryWrapper = new QueryWrapper<Operator>().lambda()
-                .eq(Operator::getAccount, account);
+                .eq(Operator::getUserName, userName);
         return getOne(queryWrapper);
     }
 
@@ -305,21 +329,46 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
         List<Role> roleVoList = operatorRoleService.getEnableListByOperatorId(userId);
         List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(toList());
-        Objects.requireNonNull(operatorVO).setRoles(roleKeyList);
+        List<Menu> menuList = menuService.getEnableMenuListByOperatorId(userId);
+        List<String> permissionList = menuList.stream().filter(vo -> StringUtils.isNotBlank(vo.getPermission())).map(Menu::getPermission).collect(toList());
+        permissionList.addAll(roleKeyList);
+        operatorVO.setPermissionList(permissionList);
         return operatorVO;
     }
 
     @Override
-    public OperatorVO getInfo(String account) {
+    public OperatorVO getInfo(String userName) {
         LambdaQueryWrapper<Operator> lambdaQueryWrapper = new QueryWrapper<Operator>().lambda()
-                .eq(Operator::getAccount, account);
+                .eq(Operator::getUserName, userName);
         Operator operator = getOne(lambdaQueryWrapper);
         AssertUtil.isNotNull(operator, "该用户不存在");
         OperatorVO operatorVO = BeanCopyUtil.copyProperties(operator, OperatorVO.class);
         List<Role> roleVoList = operatorRoleService.getEnableListByOperatorId(operator.getId());
         List<String> roleKeyList = roleVoList.stream().map(Role::getRoleKey).collect(toList());
-        Objects.requireNonNull(operatorVO).setRoles(roleKeyList);
+        List<Menu> menuList = menuService.getEnableMenuListByOperatorId(operator.getId());
+        List<String> permissionList = menuList.stream().filter(vo -> StringUtils.isNotBlank(vo.getPermission())).map(Menu::getPermission).collect(toList());
+        permissionList.addAll(roleKeyList);
+        operatorVO.setPermissionList(permissionList);
         return operatorVO;
+    }
+
+    @Override
+    public List<Map<String, Object>> getDownLoadData(DownQueryDTO dto) {
+        AssertUtil.isNotNull(dto, "参数不能为空");
+        List<Map<String, Object>> list = new ArrayList<>();
+        PageVO<OperatorVO> operatorPageVo = queryListByPage(dto);
+        List<OperatorVO> operatorVoList = operatorPageVo.getRecords();
+        operatorVoList.forEach(vo -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("用户名", vo.getUserName());
+            map.put("头像", vo.getAvatar());
+            map.put("邮箱", vo.getEmail());
+            map.put("状态", vo.getStatus() == 1 ? "启用" : "禁用");
+            map.put("手机号码", vo.getPhone());
+            map.put("创建日期", vo.getCreateTime());
+            list.add(map);
+        });
+        return list;
     }
 
 

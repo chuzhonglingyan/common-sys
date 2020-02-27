@@ -1,21 +1,27 @@
 package com.yuntian.sys.controller;
 
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import javax.annotation.Resource;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuntian.architecture.data.Result;
 import com.yuntian.architecture.data.ResultGenerator;
+import com.yuntian.sys.annotation.Permission;
 import com.yuntian.sys.common.BaseBackendController;
+import com.yuntian.sys.common.constant.PermissionCodes;
+import com.yuntian.sys.model.dto.RoleQueryDTO;
 import com.yuntian.sys.model.dto.RoleSaveDTO;
 import com.yuntian.sys.model.dto.RoleUpdateDTO;
 import com.yuntian.sys.model.entity.Role;
-import com.yuntian.sys.model.dto.RoleQueryDTO;
-
-import org.springframework.web.bind.annotation.RestController;
+import com.yuntian.sys.model.vo.RoleVO;
 import com.yuntian.sys.service.RoleService;
+
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+import javax.annotation.Resource;
 
 /**
  * <p>
@@ -33,23 +39,25 @@ public class RoleController extends BaseBackendController {
     @Resource
     private RoleService roleService;
 
-
+    @Permission(value = PermissionCodes.ROLE_ADD)
     @PostMapping("/save")
-    public Result save(RoleSaveDTO dto) {
+    public Result save(@RequestBody @Validated RoleSaveDTO dto) {
         dto.setCreateId(getUserId());
         dto.setUpdateId(getUserId());
         roleService.saveByDTO(dto);
         return ResultGenerator.genSuccessResult();
     }
 
+    @Permission(value = PermissionCodes.ROLE_EDIT)
     @PostMapping("/update")
-    public Result update(RoleUpdateDTO dto) {
+    public Result update(@RequestBody @Validated RoleUpdateDTO dto) {
         dto.setCreateId(getUserId());
         dto.setUpdateId(getUserId());
         roleService.updateByDTO(dto);
         return ResultGenerator.genSuccessResult();
     }
 
+    @Permission(value = PermissionCodes.ROLE_DEL)
     @PostMapping("/delete")
     public Result delete(Role dto) {
         dto.setUpdateId(getUserId());
@@ -57,17 +65,34 @@ public class RoleController extends BaseBackendController {
         return ResultGenerator.genSuccessResult();
     }
 
-    @PostMapping("/detail")
-    public Result detail(@RequestParam Long id) {
-        Role entity = roleService.getById(id);
+    @Permission(value = PermissionCodes.ROLE_DEL)
+    @PostMapping("/deleteList")
+    public Result deleteList(@RequestBody List<Long> idList) {
+        roleService.deleteBatchByDTO(getUserId(), idList);
+        return ResultGenerator.genSuccessResult();
+    }
+
+    @Permission(value = PermissionCodes.ROLE_LIST)
+    @PostMapping("/list")
+    public Result list(@RequestBody RoleQueryDTO dto) {
+        return ResultGenerator.genSuccessResult(roleService.queryListByPage(dto));
+    }
+
+    @Permission(value = PermissionCodes.ROLE_STATE)
+    @PostMapping("/changeState")
+    public Result changeState(@RequestBody Role dto) {
+        dto.setUpdateId(getUserId());
+        roleService.changeState(dto);
+        return ResultGenerator.genSuccessResult();
+    }
+
+
+    @PostMapping("/getInfo")
+    public Result getInfo(@RequestBody Role dto) {
+        RoleVO entity = roleService.getInfo(dto.getId());
         return ResultGenerator.genSuccessResult(entity);
     }
 
-
-    @PostMapping("/list")
-    public Result list(RoleQueryDTO dto) {
-        return ResultGenerator.genSuccessResult(roleService.queryListByPage(dto));
-    }
 
     @PostMapping("/getEnableList")
     public Result getEnableList() {

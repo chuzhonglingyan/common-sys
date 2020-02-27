@@ -1,6 +1,7 @@
 package com.yuntian.sys.service;
 
 import com.yuntian.architecture.data.IBaseService;
+import com.yuntian.sys.model.dto.DownQueryDTO;
 import com.yuntian.sys.model.dto.LoginDTO;
 import com.yuntian.sys.model.dto.OperatorQueryDTO;
 import com.yuntian.sys.model.dto.OperatorSaveDTO;
@@ -11,6 +12,7 @@ import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.model.vo.PageVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -29,12 +31,13 @@ public interface OperatorService extends IBaseService<Operator> {
 
     void deleteByDTO(Operator dto);
 
-    void isEnable(Operator dto);
+    void enable(Operator dto);
 
-    void isDisEnable(Operator dto);
+    void disEnable(Operator dto);
+
+    void changeState(Operator dto);
 
     PageVO<OperatorVO> queryListByPage(OperatorQueryDTO dto);
-
 
     void deleteBatchByDTO(Long operatorId, List<Long> idList);
 
@@ -42,11 +45,12 @@ public interface OperatorService extends IBaseService<Operator> {
 
     Operator register(RegisterDTO dto);
 
-    Operator getUserByAccount(String account) ;
+    Operator getUserByName(String userName);
 
     OperatorVO getInfo(Long userId);
 
-    OperatorVO getInfo(String account);
+    OperatorVO getInfo(String userName);
 
+    List<Map<String, Object>> getDownLoadData(DownQueryDTO dto);
 
 }

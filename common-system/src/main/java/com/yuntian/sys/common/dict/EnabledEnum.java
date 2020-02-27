@@ -8,30 +8,34 @@ package com.yuntian.sys.common.dict;
 public enum EnabledEnum {
 
     /**
-     * 启用
-     */
-    ENABLED("启用", 1),
-    /**
      * 禁用
      */
     DISENABLED("禁用", 0),
+    /**
+     * 启用
+     */
+    ENABLED("启用", 1),
     ;
 
     private String name;
-    private int type;
+    private int value;
 
-    EnabledEnum(String name, int type) {
+    EnabledEnum(String name, int value) {
         this.name = name;
-        this.type = type;
+        this.value = value;
     }
 
     @Override
     public String toString() {
-        return this.type + "_" + this.name;
+        return this.value + "_" + this.name;
     }
 
-    public int getType(){
-      return  this.type;
+    public int getValue() {
+        return this.value;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
 }

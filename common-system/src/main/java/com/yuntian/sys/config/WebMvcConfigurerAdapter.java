@@ -59,7 +59,8 @@ public class WebMvcConfigurerAdapter implements WebMvcConfigurer {
         // addPathPatterns 用于添加拦截规则  excludePathPatterns 用户排除拦截
         registry.addInterceptor(backendLoginInterceptor())
                 .addPathPatterns("/sys/**")
-                .excludePathPatterns("/error/**", "/static/**","/sys/operator/login","/sys/operator/register","/sys/operator/code");
+                .excludePathPatterns("/error/**", "/static/**",
+                        "/sys/operator/login","/sys/operator/register","/sys/operator/code","/sys/operator/loginOut");
     }
 
     @Bean

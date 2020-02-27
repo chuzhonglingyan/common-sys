@@ -120,11 +120,11 @@ public class OperatorRoleServiceImpl extends BaseServiceImpl<OperatorRoleMapper,
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveRoleListByOperatorId(Long operatorId,List<Long> roleIdList) {
-        //删除原先的关联关系
-        deleteByOperatorId(operatorId);
         if (CollectionUtils.isEmpty(roleIdList)) {
             BusinessException.throwMessage("请选择角色");
         }
+        //删除原先的关联关系
+        deleteByOperatorId(operatorId);
         List<OperatorRole> operatorRoleList = new ArrayList<>();
         for (Long roleId : roleIdList) {
             OperatorRole operatorRole = new OperatorRole();
@@ -192,7 +192,7 @@ public class OperatorRoleServiceImpl extends BaseServiceImpl<OperatorRoleMapper,
             return new ArrayList<>();
         }
         LambdaQueryWrapper<Role> lambdaQueryWrapper = new QueryWrapper<Role>().lambda()
-                .eq(Role::getStatus, EnabledEnum.ENABLED.getType())
+                .eq(Role::getStatus, EnabledEnum.ENABLED.getValue())
                 .in(Role::getId, roleIdList);
         return roleService.list(lambdaQueryWrapper);
     }

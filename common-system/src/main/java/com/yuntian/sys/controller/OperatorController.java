@@ -1,13 +1,15 @@
 package com.yuntian.sys.controller;
 
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wf.captcha.ArithmeticCaptcha;
 import com.yuntian.architecture.data.Result;
 import com.yuntian.architecture.data.ResultGenerator;
 import com.yuntian.architecture.util.UUIDUitl;
+import com.yuntian.sys.annotation.Permission;
 import com.yuntian.sys.common.BaseBackendController;
+import com.yuntian.sys.common.constant.PermissionCodes;
 import com.yuntian.sys.common.constant.RedisKey;
+import com.yuntian.sys.model.dto.DownQueryDTO;
 import com.yuntian.sys.model.dto.LoginDTO;
 import com.yuntian.sys.model.dto.OperatorQueryDTO;
 import com.yuntian.sys.model.dto.OperatorSaveDTO;
@@ -15,9 +17,9 @@ import com.yuntian.sys.model.dto.OperatorUpdateDTO;
 import com.yuntian.sys.model.dto.RegisterDTO;
 import com.yuntian.sys.model.entity.Operator;
 import com.yuntian.sys.model.vo.CodeImageVO;
-import com.yuntian.sys.model.vo.MenuComponentVo;
 import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.service.OperatorService;
+import com.yuntian.sys.util.FileUtil;
 import com.yuntian.sys.util.IPUtil;
 
 import org.springframework.validation.annotation.Validated;
@@ -28,9 +30,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -40,6 +47,7 @@ import javax.annotation.Resource;
  * @author yuntian
  * @since 2020-01-31
  */
+@Slf4j
 @RestController
 @RequestMapping("/sys/operator")
 public class OperatorController extends BaseBackendController {
@@ -48,7 +56,7 @@ public class OperatorController extends BaseBackendController {
     @Resource
     private OperatorService operatorService;
 
-
+    @Permission(value = PermissionCodes.USER_ADD)
     @PostMapping("/save")
     public Result save(@RequestBody @Validated OperatorSaveDTO dto) {
         dto.setCreateId(getUserId());
@@ -57,7 +65,7 @@ public class OperatorController extends BaseBackendController {
         return ResultGenerator.genSuccessResult();
     }
 
-
+    @Permission(value = PermissionCodes.USER_EDIT)
     @PostMapping("/update")
     public Result update(@RequestBody @Validated OperatorUpdateDTO dto) {
         dto.setCreateId(getUserId());
@@ -66,7 +74,7 @@ public class OperatorController extends BaseBackendController {
         return ResultGenerator.genSuccessResult();
     }
 
-
+    @Permission(value = PermissionCodes.USER_DEL)
     @PostMapping("/delete")
     public Result delete(Operator dto) {
         dto.setUpdateId(getUserId());
@@ -74,26 +82,47 @@ public class OperatorController extends BaseBackendController {
         return ResultGenerator.genSuccessResult();
     }
 
-
-
+    @Permission(value = PermissionCodes.USER_DEL)
     @PostMapping("/deleteList")
     public Result deleteList(@RequestBody List<Long> idList) {
-        operatorService.deleteBatchByDTO(getUserId(),idList);
+        operatorService.deleteBatchByDTO(getUserId(), idList);
         return ResultGenerator.genSuccessResult();
     }
 
-    @PostMapping("/detail")
-    public Result detail() {
+    @Permission(value = PermissionCodes.USER_LIST)
+    @PostMapping("/list")
+    public Result list(@RequestBody OperatorQueryDTO dto) {
+        return ResultGenerator.genSuccessResult(operatorService.queryListByPage(dto));
+    }
+
+    @Permission(value = PermissionCodes.USER_STATE)
+    @PostMapping("/changeState")
+    public Result changeState(@RequestBody Operator dto) {
+        dto.setUpdateId(getUserId());
+        operatorService.changeState(dto);
+        return ResultGenerator.genSuccessResult();
+    }
+
+
+    @PostMapping("/getInfo")
+    public Result getInfo() {
         OperatorVO entity = operatorService.getInfo(getUserId());
         return ResultGenerator.genSuccessResult(entity);
     }
 
-
-    @PostMapping("/list")
-    public  Result list(@RequestBody OperatorQueryDTO dto) {
-        return ResultGenerator.genSuccessResult(operatorService.queryListByPage(dto));
+    @PostMapping("/getInfoById")
+    public Result getInfoById(@RequestBody Operator dto) {
+        OperatorVO entity = operatorService.getInfo(dto.getId());
+        return ResultGenerator.genSuccessResult(entity);
     }
 
+
+
+    @PostMapping(value = "/list/download")
+    public void download(@RequestBody DownQueryDTO dto, HttpServletResponse response) throws IOException {
+        List<Map<String, Object>> list = operatorService.getDownLoadData(dto);
+        FileUtil.downloadExcel(list, response);
+    }
 
 
     /**

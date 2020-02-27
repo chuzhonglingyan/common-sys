@@ -6,6 +6,11 @@ import com.yuntian.architecture.data.BaseDTO;
 import java.io.Serializable;
 import java.util.List;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class RoleMenuDTO extends BaseDTO implements Serializable {
 
 
@@ -14,19 +19,5 @@ public class RoleMenuDTO extends BaseDTO implements Serializable {
     private Long roleId;
     private List<Long> menuIdList;
 
-    public Long getRoleId() {
-        return roleId;
-    }
 
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
-    }
-
-    public List<Long> getMenuIdList() {
-        return menuIdList;
-    }
-
-    public void setMenuIdList(List<Long> menuIdList) {
-        this.menuIdList = menuIdList;
-    }
 }

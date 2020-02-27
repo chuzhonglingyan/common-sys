@@ -1,19 +1,15 @@
 package com.yuntian.sys.service;
 
 
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuntian.architecture.data.IBaseService;
-
-import java.util.Collection;
-import java.util.List;
-
 import com.yuntian.sys.model.dto.RoleQueryDTO;
 import com.yuntian.sys.model.dto.RoleSaveDTO;
 import com.yuntian.sys.model.dto.RoleUpdateDTO;
 import com.yuntian.sys.model.entity.Role;
 import com.yuntian.sys.model.vo.PageVO;
 import com.yuntian.sys.model.vo.RoleVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -32,17 +28,22 @@ public interface RoleService extends IBaseService<Role> {
 
     void deleteByDTO(Role dto);
 
-    void isEnable(Role dto);
+    void enable(Role dto);
 
-    void isDisEnable(Role dto);
+    void disEnable(Role dto);
 
+    void   changeState(Role dto);
 
     PageVO<RoleVO> queryListByPage(RoleQueryDTO dto);
 
-    void deleteBatchByDTO(Collection<Role> entityList);
+    void deleteBatchByDTO(Long operatorId,List<Long> idList);
 
     List<Role> getEnableList();
 
     List<Role> getRoleByKey(String roleKey);
+
+
+    RoleVO  getInfo(Long id);
+
 
 }

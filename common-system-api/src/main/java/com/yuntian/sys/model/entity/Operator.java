@@ -24,14 +24,10 @@ public class Operator extends BaseEntity {
 
     private static final long serialVersionUID = 7307209222680989319L;
     /**
-    * 账号
-    */
-    private String account;
-
-    /**
     * 用户名
     */
     private String userName;
+
 
     /**
      * 昵称
@@ -67,7 +63,7 @@ public class Operator extends BaseEntity {
     /**
     * 是否启用，0-禁用，1-启用，默认为0
     */
-    private Integer isEnabled;
+    private Integer status;
 
     /**
     * 是否超级管理员，0-否，1-是，默认为0

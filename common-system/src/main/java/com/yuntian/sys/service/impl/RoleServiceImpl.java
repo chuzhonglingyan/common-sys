@@ -1,6 +1,6 @@
 package com.yuntian.sys.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -59,7 +58,7 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, Role> implement
         Role role = BeanCopyUtil.copyProperties(dto, Role.class);
         boolean flag = save(role);
         AssertUtil.isNotTrue(flag, "保存失败");
-        List<Role> roleList = getRoleByKey(dto.getKey());
+        List<Role> roleList = getRoleByKey(dto.getRoleKey());
         if (CollectionUtils.isNotEmpty(roleList) && roleList.size() > 1) {
             BusinessException.throwMessage("该角色已经存在");
         }
@@ -88,28 +87,29 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, Role> implement
     }
 
     @Override
-    public void isEnable(Role dto) {
+    public void enable(Role dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
-        dto.setStatus(EnabledEnum.DISENABLED.getType());
-        UpdateWrapper<Role> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("id", dto.getId());
-        updateWrapper.set("status", EnabledEnum.ENABLED.getType());
-        update(dto, updateWrapper);
+        dto.setStatus(EnabledEnum.ENABLED.getValue());
+        LambdaQueryWrapper<Role> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(Role::getId, dto.getId());
+        updateWrapper.eq(Role::getStatus, EnabledEnum.DISENABLED.getValue());
+        boolean flag = update(dto, updateWrapper);
+        AssertUtil.isNotTrue(flag, "启用失败,请刷新页面");
     }
 
     @Override
-    public void isDisEnable(Role dto) {
+    public void disEnable(Role dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
         List<Long> operatorIdList = operatorRoleService.getOperatorIdListByRoleId(dto.getId());
         if (CollectionUtils.isNotEmpty(operatorIdList)) {
             BusinessException.throwMessage("角色下关联着用户,不能禁用");
         }
-
-        dto.setStatus(EnabledEnum.ENABLED.getType());
-        UpdateWrapper<Role> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("id", dto.getId());
-        updateWrapper.set("status", EnabledEnum.DISENABLED.getType());
-        update(dto, updateWrapper);
+        dto.setStatus(EnabledEnum.DISENABLED.getValue());
+        LambdaQueryWrapper<Role> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(Role::getId, dto.getId());
+        updateWrapper.eq(Role::getStatus, EnabledEnum.ENABLED.getValue());
+        boolean flag = update(dto, updateWrapper);
+        AssertUtil.isNotTrue(flag, "禁用失败,请刷新页面");
     }
 
 
@@ -125,37 +125,80 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, Role> implement
     public PageVO<RoleVO> queryListByPage(RoleQueryDTO dto) {
         AssertUtil.isNotNull(dto, "参数不能为空");
         IPage<Role> pageParam = new Page<>(dto.getCurrent(), dto.getSize());
-        PageVO<RoleVO> roleVoPage=new PageVO<RoleVO>(page(pageParam)){};
-        List<RoleVO> roleVoList=roleVoPage.getRecords();
-        if (CollectionUtils.isEmpty(roleVoList)){
+        PageVO<RoleVO> roleVoPage = new PageVO<RoleVO>(page(pageParam)) {
+        };
+        List<RoleVO> roleVoList = roleVoPage.getRecords();
+        if (CollectionUtils.isEmpty(roleVoList)) {
             return roleVoPage;
         }
-        List<Long> roleIdList=roleVoList.stream().map(RoleVO::getId).distinct().collect(Collectors.toList());
-        List<RoleMenu> roleMenuList=roleMenuService.getRoleMenuList(roleIdList);
-        Map<Long, List<Long>> groupByRoleId = roleMenuList.stream().collect(Collectors.groupingBy(RoleMenu::getRoleId,Collectors.mapping(RoleMenu::getMenuId,Collectors.toList())));
+        List<Long> roleIdList = roleVoList.stream().map(RoleVO::getId).distinct().collect(Collectors.toList());
+        List<RoleMenu> roleMenuList = roleMenuService.getRoleMenuList(roleIdList);
+        Map<Long, List<Long>> groupByRoleId = roleMenuList.stream().collect(Collectors.groupingBy(RoleMenu::getRoleId, Collectors.mapping(RoleMenu::getMenuId, Collectors.toList())));
         roleVoPage.getRecords().forEach(roleVO -> {
-            roleVO.setMenuIdList(groupByRoleId.getOrDefault(roleVO.getId(),new ArrayList<>()));
+            roleVO.setMenuIdList(groupByRoleId.getOrDefault(roleVO.getId(), new ArrayList<>()));
         });
         return roleVoPage;
     }
 
-    @Override
-    public void deleteBatchByDTO(Collection<Role> entityList) {
-
-    }
 
     @Override
     public List<Role> getEnableList() {
         Map<String, Object> map = new HashMap<>();
-        map.put("status", EnabledEnum.ENABLED.getType());
+        map.put("status", EnabledEnum.ENABLED.getValue());
         return listByMap(map);
     }
 
     @Override
     public List<Role> getRoleByKey(String roleKey) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("role", roleKey);
-        return listByMap(map);
+        LambdaQueryWrapper<Role> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Role::getRoleKey, roleKey);
+        return list(lambdaQueryWrapper);
     }
+
+    @Override
+    public RoleVO getInfo(Long id) {
+        Role role = getById(id);
+        RoleVO roleVO = BeanCopyUtil.copyProperties(role, RoleVO.class);
+        List<Long> menuIdList = roleMenuService.getMenuIdListByRoleId(id);
+        roleVO.setMenuIdList(menuIdList);
+        return roleVO;
+    }
+
+    @Override
+    public void changeState(Role dto) {
+        AssertUtil.isNotNull(dto.getId(), "id不能为空");
+        AssertUtil.isNotNull(dto.getStatus(), "状态不能为空");
+        if (dto.getStatus() == 0) {
+            enable(dto);
+        } else {
+            disEnable(dto);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteBatchByDTO(Long operatorId, List<Long> idList) {
+        AssertUtil.isNotEmpty(idList, "集合不能为空");
+        Collection<Role> entityList = new ArrayList<>();
+        idList.forEach(id -> {
+            Role roleTemp = getById(id);
+            if (roleTemp.getStatus() == EnabledEnum.ENABLED.getValue()) {
+                BusinessException.throwMessage("角色处于启用状态，无法删除.");
+            }
+            List<Long> operatorIdList = operatorRoleService.getOperatorIdListByRoleId(id);
+            if (CollectionUtils.isNotEmpty(operatorIdList)) {
+                BusinessException.throwMessage("角色下关联着用户,不能删除");
+            }
+            //删除关系
+            roleMenuService.deleteByRoleId(id);
+            Role role = new Role();
+            role.setId(id);
+            role.setUpdateId(operatorId);
+            entityList.add(role);
+        });
+        boolean flag = deleteByIdsWithFill(entityList);
+        AssertUtil.isNotTrue(flag, "删除失败,请刷新重试");
+    }
+
 
 }

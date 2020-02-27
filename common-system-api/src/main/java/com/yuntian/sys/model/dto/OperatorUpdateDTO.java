@@ -1,6 +1,7 @@
 package com.yuntian.sys.model.dto;
 
 import com.yuntian.architecture.data.BaseDTO;
+import com.yuntian.sys.valid.SwitchConstraint;
 
 import org.hibernate.validator.constraints.Length;
 
@@ -30,10 +31,6 @@ public class OperatorUpdateDTO extends BaseDTO implements Serializable {
     @NotNull(message = "id不能为空")
     private Long id;
 
-    @Length(max = 50, message = "用户名最大50位")
-    private String userName;
-
-
     @Email(message = "邮箱格式错误")
     private String email;
 
@@ -41,7 +38,8 @@ public class OperatorUpdateDTO extends BaseDTO implements Serializable {
 
     private Integer sex;
 
-    private Integer isEnabled;
+    @SwitchConstraint(message = "状态值错误")
+    private Integer status;
 
     private List<Long> roleIdList;
 

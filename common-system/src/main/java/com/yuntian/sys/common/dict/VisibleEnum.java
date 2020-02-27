@@ -5,25 +5,22 @@ package com.yuntian.sys.common.dict;
  * @Date: 2020/2/1 0001 12:34
  * @Description:
  */
-public enum MenuTypeEnum {
+public enum VisibleEnum {
 
     /**
-     * 根目录
+     * 隐藏
      */
-    ROOT("根目录", 0),
+    HIDDEN("隐藏", 0),
     /**
-     * 菜单
+     * 显示
      */
-    MENU("菜单", 1),
-    /**
-     * 按钮
-     */
-    BUTTON("按钮", 2);
+    VISIBLE("显示", 1),
+    ;
 
     private String name;
     private int value;
 
-    MenuTypeEnum(String name, int value) {
+    VisibleEnum(String name, int value) {
         this.name = name;
         this.value = value;
     }
@@ -40,5 +37,4 @@ public enum MenuTypeEnum {
     public String getName() {
         return this.name;
     }
-
 }

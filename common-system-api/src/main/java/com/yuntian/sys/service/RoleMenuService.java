@@ -51,4 +51,6 @@ public interface RoleMenuService extends IBaseService<RoleMenu> {
 
    List<Menu> getEnableMenuListByRoleIds(List<Long> roleIdList);
 
+
+
 }

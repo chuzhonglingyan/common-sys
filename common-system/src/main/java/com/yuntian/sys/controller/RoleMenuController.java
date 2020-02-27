@@ -21,14 +21,14 @@ import javax.annotation.Resource;
  * Created by CodeGenerator on 2019/02/26.
  */
 @RestController
-@RequestMapping("/role/menu")
+@RequestMapping("/sys/role/menu")
 public class RoleMenuController extends BaseBackendController {
 
     @Resource
     private RoleMenuService roleMenuService;
 
 
-    @PostMapping("/saveMenuListByRoleId")
+    @PostMapping("/saveMenuList")
     public Result saveMenuListByRoleId(@RequestBody RoleMenuDTO roleMenuDTO) {
         roleMenuDTO.setCreateId(getUserId());
         roleMenuDTO.setUpdateId(getUserId());

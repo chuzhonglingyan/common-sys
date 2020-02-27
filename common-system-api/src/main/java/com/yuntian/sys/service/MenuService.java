@@ -2,10 +2,6 @@ package com.yuntian.sys.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuntian.architecture.data.IBaseService;
-
-import java.util.Collection;
-import java.util.List;
-
 import com.yuntian.sys.model.dto.MenuQueryDTO;
 import com.yuntian.sys.model.dto.MenuSaveDTO;
 import com.yuntian.sys.model.dto.MenuUpdateDTO;
@@ -14,6 +10,9 @@ import com.yuntian.sys.model.vo.MenuComponentVo;
 import com.yuntian.sys.model.vo.MenuTreeLabelVO;
 import com.yuntian.sys.model.vo.MenuTreeVO;
 import com.yuntian.sys.model.vo.PageVO;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>
@@ -35,9 +34,11 @@ public interface MenuService extends IBaseService<Menu> {
 
     void deleteByDTO(Menu dto);
 
-    void isEnable(Menu dto);
+    void enable(Menu dto);
 
-    void isDisEnable(Menu dto);
+    void disEnable(Menu dto);
+
+    void changeState(Menu dto);
 
     void sort(Menu dto);
 
@@ -54,6 +55,13 @@ public interface MenuService extends IBaseService<Menu> {
 
     List<MenuTreeLabelVO> getEnabledMenuTreeList();
 
+    List<MenuTreeLabelVO> getdMenuTreeList();
+
+    Menu getParentMenu(Long id);
+
+    List<Menu> findDirectChildByPid(Long id);
+
+
 
     List<Menu> getEnableMenuListByOperatorId(Long operatorId);
 
@@ -61,5 +69,7 @@ public interface MenuService extends IBaseService<Menu> {
 
 
     List<MenuComponentVo> getMenuComponentTreeVoListByOperator(Long operatorId);
+
+    void deleteBatchByDTO(Long operatorId, List<Long> idList);
 
 }
