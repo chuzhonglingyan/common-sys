@@ -155,6 +155,8 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
         AssertUtil.isNotTrue(flag, "启用失败,请刷新页面");
     }
 
+
+
     @Override
     public void disEnable(Operator dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
@@ -197,11 +199,10 @@ public class OperatorServiceImpl extends BaseServiceImpl<OperatorMapper, Operato
             String createTimeEnd = createTime.get(1);
             queryWrapper.between(Operator::getCreateTime, createTimeStart, createTimeEnd);
         }
-        queryWrapper.eq(Objects.nonNull(dto.getIsEnabled()), Operator::getStatus, dto.getIsEnabled());
+        queryWrapper.eq(Objects.nonNull(dto.getStatus()), Operator::getStatus, dto.getStatus());
         queryWrapper.orderByDesc(Operator::getUpdateTime);
 
-        PageVO<OperatorVO> operatorVoPage = new PageVO<OperatorVO>(page(pageParam, queryWrapper)) {
-        };
+        PageVO<OperatorVO> operatorVoPage = new PageVO<OperatorVO>(page(pageParam, queryWrapper)) {};
         List<OperatorVO> operatorVoList = operatorVoPage.getRecords();
         if (CollectionUtils.isEmpty(operatorVoList)) {
             return operatorVoPage;

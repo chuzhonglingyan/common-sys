@@ -2,6 +2,10 @@ package com.yuntian.sys.model.dto;
 
 import java.io.Serializable;
 import com.yuntian.architecture.data.BaseDTO;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
 *
 * <p>
@@ -10,6 +14,9 @@ import com.yuntian.architecture.data.BaseDTO;
 * @author yuntian
 * @since 2020-02-27
 */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class DictDetailDTO extends BaseDTO implements Serializable{
 
+    private Long dictId;
 }

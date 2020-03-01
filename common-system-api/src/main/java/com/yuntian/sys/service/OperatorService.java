@@ -33,6 +33,7 @@ public interface OperatorService extends IBaseService<Operator> {
 
     void enable(Operator dto);
 
+
     void disEnable(Operator dto);
 
     void changeState(Operator dto);

@@ -1,9 +1,14 @@
 package com.yuntian.sys.service;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.yuntian.sys.model.dto.DictDTO;
-import com.yuntian.sys.model.entity.Dict;
 import com.yuntian.architecture.data.IBaseService;
+import com.yuntian.sys.model.dto.DictQueryDTO;
+import com.yuntian.sys.model.entity.Dict;
+import com.yuntian.sys.model.entity.Menu;
+import com.yuntian.sys.model.vo.DictVO;
+
 import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>
@@ -15,15 +20,23 @@ import java.util.Collection;
  */
 public interface DictService extends IBaseService<Dict> {
 
-   IPage<Dict> queryListByPage(DictDTO dto);
+
+    void saveByDTO(Dict dto);
 
 
-   void updateByDTO(Dict dto);
+    void updateByDTO(Dict dto);
 
 
-   void deleteByDTO(Dict dto);
+    void deleteByDTO(Dict dto);
 
 
-   void deleteBatchByDTO(Collection<Dict> entityList);
+    void deleteBatchByDTO(Long operatorId, List<Long> idList);
 
+
+    IPage<Dict> queryListByPage(DictQueryDTO dto);
+
+
+    List<DictVO> getAll();
+
+    Dict  getDictByName(String name);
 }

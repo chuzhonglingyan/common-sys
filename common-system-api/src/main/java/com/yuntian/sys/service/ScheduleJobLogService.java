@@ -17,6 +17,7 @@ public interface ScheduleJobLogService extends IBaseService<ScheduleJobLog> {
 
    IPage<ScheduleJobLog> queryListByPage(ScheduleJobLogDTO dto);
 
+    void saveByDTO(ScheduleJobLog dto);
 
    void updateByDTO(ScheduleJobLog dto);
 

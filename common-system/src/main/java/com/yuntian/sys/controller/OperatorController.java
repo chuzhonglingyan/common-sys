@@ -68,7 +68,6 @@ public class OperatorController extends BaseBackendController {
     @Permission(value = PermissionCodes.USER_EDIT)
     @PostMapping("/update")
     public Result update(@RequestBody @Validated OperatorUpdateDTO dto) {
-        dto.setCreateId(getUserId());
         dto.setUpdateId(getUserId());
         operatorService.updateByDTO(dto);
         return ResultGenerator.genSuccessResult();

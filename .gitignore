@@ -30,3 +30,4 @@ build/
 ### VS Code ###
 .vscode/
 /logfile/
+/sys-web/logfile/

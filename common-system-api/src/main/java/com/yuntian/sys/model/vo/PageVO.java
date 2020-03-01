@@ -42,6 +42,7 @@ public class PageVO<V> {
         isSearchCount = page.isSearchCount();
     }
 
+
     private <T> List<V> convertData(Class<V> clazz, List<T> orgList) {
         return BeanCopyUtil.copyListProperties(orgList, clazz);
     }

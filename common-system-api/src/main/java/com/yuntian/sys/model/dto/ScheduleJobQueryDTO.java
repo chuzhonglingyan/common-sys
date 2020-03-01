@@ -11,16 +11,15 @@ import lombok.EqualsAndHashCode;
 /**
 *
 * <p>
-    *  后台系统-用户表
     * </p>
 * @author yuntian
 * @since 2020-01-31
 */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class OperatorQueryDTO extends BaseDTO implements Serializable{
+public class ScheduleJobQueryDTO extends BaseDTO implements Serializable{
 
-    private static final long serialVersionUID = 5407449878947509465L;
+    private static final long serialVersionUID = -293194835878683499L;
 
     private Integer status;
 

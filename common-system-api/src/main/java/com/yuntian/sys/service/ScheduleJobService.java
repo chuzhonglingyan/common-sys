@@ -1,9 +1,14 @@
 package com.yuntian.sys.service;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.yuntian.sys.model.dto.ScheduleJobDTO;
-import com.yuntian.sys.model.entity.ScheduleJob;
 import com.yuntian.architecture.data.IBaseService;
+import com.yuntian.sys.model.dto.ScheduleJobQueryDTO;
+import com.yuntian.sys.model.dto.ScheduleJobSaveDTO;
+import com.yuntian.sys.model.dto.ScheduleJobUpdateDTO;
+import com.yuntian.sys.model.entity.ScheduleJob;
+
 import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>
@@ -15,15 +20,26 @@ import java.util.Collection;
  */
 public interface ScheduleJobService extends IBaseService<ScheduleJob> {
 
-   IPage<ScheduleJob> queryListByPage(ScheduleJobDTO dto);
+
+    void saveByDTO(ScheduleJobSaveDTO dto);
+
+    void updateByDTO(ScheduleJobUpdateDTO dto);
+
+    void deleteByDTO(ScheduleJob dto);
 
 
-   void updateByDTO(ScheduleJob dto);
+    void deleteBatchByDTO(Long operatorId, List<Long> idList);
+
+    IPage<ScheduleJob> queryListByPage(ScheduleJobQueryDTO dto);
 
 
-   void deleteByDTO(ScheduleJob dto);
+    void exec(ScheduleJob dto);
+
+    void resume(ScheduleJob dto);
 
 
-   void deleteBatchByDTO(Collection<ScheduleJob> entityList);
+    void pause(ScheduleJob dto);
+
+    void changeState(ScheduleJob dto);
 
 }

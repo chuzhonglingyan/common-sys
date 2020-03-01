@@ -1,19 +1,27 @@
 package com.yuntian.sys.controller;
 
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import javax.annotation.Resource;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuntian.architecture.data.Result;
 import com.yuntian.architecture.data.ResultGenerator;
+import com.yuntian.sys.annotation.Permission;
+import com.yuntian.sys.common.BaseBackendController;
+import com.yuntian.sys.common.constant.PermissionCodes;
+import com.yuntian.sys.model.dto.DictDetailSaveDTO;
+import com.yuntian.sys.model.dto.DictDetailUpdateDTO;
+import com.yuntian.sys.model.dto.DictQueyDetailDTO;
 import com.yuntian.sys.model.entity.DictDetail;
 import com.yuntian.sys.service.DictDetailService;
-import com.yuntian.sys.model.dto.DictDetailDTO;
 
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.yuntian.sys.common.BaseBackendController;
+
+import java.util.List;
+
+import javax.annotation.Resource;
 
 /**
  * <p>
@@ -24,47 +32,55 @@ import com.yuntian.sys.common.BaseBackendController;
  * @since 2020-02-27
  */
 @RestController
-@RequestMapping("/sys/dict-detail")
+@RequestMapping("/sys/dictDetail")
 public class DictDetailController extends BaseBackendController {
 
 
     @Resource
-    private DictDetailService  dictDetailService;
+    private DictDetailService dictDetailService;
 
-
+    @Permission(value = PermissionCodes.DICT_ADD)
     @PostMapping("/save")
-    public Result save(DictDetail dto) {
+    public Result save(@RequestBody @Validated DictDetailSaveDTO dto) {
         dto.setCreateId(getUserId());
         dto.setUpdateId(getUserId());
-        dictDetailService.save(dto);
+        dictDetailService.saveByDTO(dto);
         return ResultGenerator.genSuccessResult();
     }
 
-    @PostMapping("/delete")
-    public Result delete(DictDetail dto) {
-        dto.setUpdateId(getUserId());
-        dictDetailService.deleteByDTO(dto);
-        return ResultGenerator.genSuccessResult();
-    }
-
+    @Permission(value = PermissionCodes.DICT_EDIT)
     @PostMapping("/update")
-    public Result update(DictDetail dto) {
-        dto.setCreateId(getUserId());
+    public Result update(@RequestBody @Validated DictDetailUpdateDTO dto) {
         dto.setUpdateId(getUserId());
         dictDetailService.updateByDTO(dto);
         return ResultGenerator.genSuccessResult();
     }
 
-    @PostMapping("/detail")
-    public Result detail(@RequestParam Long id) {
-        DictDetail entity = dictDetailService.getById(id);
+    @Permission(value = PermissionCodes.DICT_DEL)
+    @PostMapping("/delete")
+    public Result delete(@RequestBody DictDetail dto) {
+        dto.setUpdateId(getUserId());
+        dictDetailService.deleteByDTO(dto);
+        return ResultGenerator.genSuccessResult();
+    }
+
+    @Permission(value = PermissionCodes.DICT_DEL)
+    @PostMapping("/deleteList")
+    public Result deleteList(@RequestBody List<Long> idList) {
+        dictDetailService.deleteBatchByDTO(getUserId(), idList);
+        return ResultGenerator.genSuccessResult();
+    }
+
+    @PostMapping("/getInfo")
+    public Result getInfo(@RequestBody DictDetail dto) {
+        DictDetail entity = dictDetailService.getById(dto.getId());
         return ResultGenerator.genSuccessResult(entity);
     }
 
 
     @PostMapping("/list")
-    public IPage<DictDetail> list(DictDetailDTO dto) {
-        return dictDetailService.queryListByPage(dto);
+    public Result list(@RequestBody DictQueyDetailDTO dto) {
+        return ResultGenerator.genSuccessResult(dictDetailService.queryListByPage(dto));
     }
 
 }

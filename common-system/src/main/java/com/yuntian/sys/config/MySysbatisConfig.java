@@ -1,7 +1,6 @@
 package com.yuntian.sys.config;
 
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -12,6 +11,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @EnableTransactionManagement
 @Configuration
-@MapperScan("com.yuntian.sys.mapper*")
+@MapperScan(value = {"com.yuntian.sys.mapper"})
 public class MySysbatisConfig {
 }

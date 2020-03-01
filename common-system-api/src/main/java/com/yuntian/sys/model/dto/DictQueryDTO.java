@@ -9,24 +9,18 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
-*
-* <p>
-    *  后台系统-用户表
-    * </p>
-* @author yuntian
-* @since 2020-01-31
-*/
+ * <p>
+ * 后台系统-用户表
+ * </p>
+ *
+ * @author yuntian
+ * @since 2020-01-31
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class OperatorQueryDTO extends BaseDTO implements Serializable{
+public class DictQueryDTO extends BaseDTO implements Serializable {
 
     private static final long serialVersionUID = 5407449878947509465L;
 
-    private Integer status;
-
-    private String  blurry;
-
-    private List<String> createTime;
-
-
+    private String blurry;
 }

@@ -1,5 +1,10 @@
 package com.yuntian.sys.util;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -38,5 +43,31 @@ public class IPUtil {
         return request.getRemoteAddr();
     }
 
+
+    /**
+     * 获取本地ip 适合windows与linux
+     * @return
+     */
+    public static String getLocalIP() {
+        String localIp = "127.0.0.1";
+        try {
+            Enumeration netInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (netInterfaces.hasMoreElements()) {
+                NetworkInterface ni = (NetworkInterface) netInterfaces.nextElement();
+                InetAddress ip = ni.getInetAddresses().nextElement();
+                if (!ip.isLoopbackAddress() && !ip.getHostAddress().contains(":")) {
+                    localIp = ip.getHostAddress();
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            try {
+                localIp = InetAddress.getLocalHost().getHostAddress();
+            } catch (UnknownHostException e1) {
+                e1.printStackTrace();
+            }
+        }
+        return localIp;
+    }
 
 }

@@ -53,7 +53,6 @@ public class MenuController extends BaseBackendController {
     @Permission(value = PermissionCodes.MENU_EDIT)
     @PostMapping("/update")
     public Result update(@RequestBody @Validated MenuUpdateDTO dto) {
-        dto.setCreateId(getUserId());
         dto.setUpdateId(getUserId());
         menuService.updateByDTO(dto);
         return ResultGenerator.genSuccessResult();

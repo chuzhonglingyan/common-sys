@@ -48,6 +48,11 @@ public class ScheduleJobLog extends BaseEntity {
     private String params;
 
     /**
+     * cronExpression表达式
+     */
+    private String cronExpression;
+
+    /**
     * 任务状态 0：失败 1：成功 
     */
     private Integer status;
@@ -63,9 +68,16 @@ public class ScheduleJobLog extends BaseEntity {
     private String ip;
 
     /**
-    * 耗时(单位：毫秒)
+    * 任务真正耗时(单位：毫秒)
     */
-    private Long times;
+    private Long taskTimes;
 
+    /**
+     * 定时器总耗时(单位：毫秒)
+     */
+    private Long qzTimes;
+
+
+    private Integer manual;
 
 }

@@ -1,19 +1,23 @@
 package com.yuntian.sys.controller;
 
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import javax.annotation.Resource;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuntian.architecture.data.Result;
 import com.yuntian.architecture.data.ResultGenerator;
+import com.yuntian.sys.annotation.Permission;
+import com.yuntian.sys.common.BaseBackendController;
+import com.yuntian.sys.common.constant.PermissionCodes;
+import com.yuntian.sys.model.dto.ScheduleJobLogDTO;
+import com.yuntian.sys.model.entity.Role;
 import com.yuntian.sys.model.entity.ScheduleJobLog;
 import com.yuntian.sys.service.ScheduleJobLogService;
-import com.yuntian.sys.model.dto.ScheduleJobLogDTO;
 
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.yuntian.sys.common.BaseBackendController;
+
+import javax.annotation.Resource;
 
 /**
  * <p>
@@ -24,12 +28,12 @@ import com.yuntian.sys.common.BaseBackendController;
  * @since 2020-02-27
  */
 @RestController
-@RequestMapping("/sys/schedule-job-log")
+@RequestMapping("/sys/scheduleJobLog")
 public class ScheduleJobLogController extends BaseBackendController {
 
 
     @Resource
-    private ScheduleJobLogService  scheduleJobLogService;
+    private ScheduleJobLogService scheduleJobLogService;
 
 
     @PostMapping("/save")
@@ -49,11 +53,11 @@ public class ScheduleJobLogController extends BaseBackendController {
 
     @PostMapping("/update")
     public Result update(ScheduleJobLog dto) {
-        dto.setCreateId(getUserId());
         dto.setUpdateId(getUserId());
         scheduleJobLogService.updateByDTO(dto);
         return ResultGenerator.genSuccessResult();
     }
+
 
     @PostMapping("/detail")
     public Result detail(@RequestParam Long id) {
@@ -63,8 +67,8 @@ public class ScheduleJobLogController extends BaseBackendController {
 
 
     @PostMapping("/list")
-    public IPage<ScheduleJobLog> list(ScheduleJobLogDTO dto) {
-        return scheduleJobLogService.queryListByPage(dto);
+    public Result list(@RequestBody ScheduleJobLogDTO dto) {
+        return ResultGenerator.genSuccessResult(scheduleJobLogService.queryListByPage(dto));
     }
 
 }

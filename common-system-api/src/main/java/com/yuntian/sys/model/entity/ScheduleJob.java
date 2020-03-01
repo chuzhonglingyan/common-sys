@@ -62,10 +62,6 @@ public class ScheduleJob extends BaseEntity {
     */
     private String remark;
 
-    /**
-    * 是否删除，0-未删除，1-删除，默认为0
-    */
-    private Integer isDelete;
-
+    private Integer timeOut;
 
 }

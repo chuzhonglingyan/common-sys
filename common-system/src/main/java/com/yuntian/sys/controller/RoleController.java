@@ -51,7 +51,6 @@ public class RoleController extends BaseBackendController {
     @Permission(value = PermissionCodes.ROLE_EDIT)
     @PostMapping("/update")
     public Result update(@RequestBody @Validated RoleUpdateDTO dto) {
-        dto.setCreateId(getUserId());
         dto.setUpdateId(getUserId());
         roleService.updateByDTO(dto);
         return ResultGenerator.genSuccessResult();

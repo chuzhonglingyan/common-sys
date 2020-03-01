@@ -11,6 +11,7 @@ public interface PermissionCodes {
     String USER = "user:";
     String MENU = "menu:";
     String ROLE = "role:";
+    String DICT = "dict:";
 
     /**
      * 用户列表
@@ -78,4 +79,23 @@ public interface PermissionCodes {
      * 角色修改状态
      */
     String ROLE_STATE = ROLE + "state";
+
+    /**
+     * 字典列表
+     */
+    String DICT_LIST = DICT + "list";
+    /**
+     * 字典新增
+     */
+    String DICT_ADD = DICT + "add";
+    /**
+     * 字典编辑
+     */
+    String DICT_EDIT = DICT + "edit";
+    /**
+     * 字典删除
+     */
+    String DICT_DEL = DICT + "del";
+
+
 }

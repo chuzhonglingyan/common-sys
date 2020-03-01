@@ -97,19 +97,20 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, Role> implement
         AssertUtil.isNotTrue(flag, "启用失败,请刷新页面");
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void disEnable(Role dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
-        List<Long> operatorIdList = operatorRoleService.getOperatorIdListByRoleId(dto.getId());
-        if (CollectionUtils.isNotEmpty(operatorIdList)) {
-            BusinessException.throwMessage("角色下关联着用户,不能禁用");
-        }
         dto.setStatus(EnabledEnum.DISENABLED.getValue());
         LambdaQueryWrapper<Role> updateWrapper = new LambdaQueryWrapper<>();
         updateWrapper.eq(Role::getId, dto.getId());
         updateWrapper.eq(Role::getStatus, EnabledEnum.ENABLED.getValue());
         boolean flag = update(dto, updateWrapper);
         AssertUtil.isNotTrue(flag, "禁用失败,请刷新页面");
+        List<Long> operatorIdList = operatorRoleService.getOperatorIdListByRoleId(dto.getId());
+        if (CollectionUtils.isNotEmpty(operatorIdList)) {
+            BusinessException.throwMessage("角色下关联着用户,不能禁用");
+        }
     }
 
 
@@ -143,9 +144,9 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, Role> implement
 
     @Override
     public List<Role> getEnableList() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("status", EnabledEnum.ENABLED.getValue());
-        return listByMap(map);
+        LambdaQueryWrapper<Role> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Role::getStatus, EnabledEnum.ENABLED.getValue());
+        return list(lambdaQueryWrapper);
     }
 
     @Override
@@ -164,6 +165,7 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, Role> implement
         return roleVO;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void changeState(Role dto) {
         AssertUtil.isNotNull(dto.getId(), "id不能为空");
