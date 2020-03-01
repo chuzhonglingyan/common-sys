@@ -76,7 +76,7 @@ public class DictController extends BaseBackendController {
         return ResultGenerator.genSuccessResult(entity);
     }
 
-
+    @Permission(value = PermissionCodes.DICT_LIST)
     @PostMapping("/list")
     public Result list(@RequestBody DictQueryDTO dto) {
         return ResultGenerator.genSuccessResult(dictService.queryListByPage(dto));

@@ -12,7 +12,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -29,20 +28,6 @@ import java.util.List;
 public class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 
 
-    /**
-     * 设置自己的path匹配规则
-     *
-     * @param configurer
-     */
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        // 设置为true: localhost:8080/test 与 localhost:8080/test/ 等价
-        configurer.setUseTrailingSlashMatch(true);
-        // 设置为true: localhost:8080/test 与 localhost:8080/test.jsp 等价
-        configurer.setUseSuffixPatternMatch(true);
-    }
-
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/templates/**").addResourceLocations(ResourceUtils.CLASSPATH_URL_PREFIX + "/templates/");
@@ -50,29 +35,20 @@ public class WebMvcConfigurerAdapter implements WebMvcConfigurer {
     }
 
 
-    /**
-     *
-     * @param registry
-     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // addPathPatterns 用于添加拦截规则  excludePathPatterns 用户排除拦截
         registry.addInterceptor(backendLoginInterceptor())
                 .addPathPatterns("/sys/**")
                 .excludePathPatterns("/error/**", "/static/**",
-                        "/sys/operator/login","/sys/operator/register","/sys/operator/code","/sys/operator/loginOut");
+                        "/sys/operator/login", "/sys/operator/register", "/sys/operator/code", "/sys/operator/loginOut");
     }
 
     @Bean
-    BackendLoginInterceptor backendLoginInterceptor(){
-        return  new BackendLoginInterceptor();
+    BackendLoginInterceptor backendLoginInterceptor() {
+        return new BackendLoginInterceptor();
     }
 
 
-    /**
-     * 配置fastJson
-     * @param converters
-     */
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.removeIf(converter -> converter instanceof MappingJackson2HttpMessageConverter);

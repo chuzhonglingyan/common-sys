@@ -1,6 +1,6 @@
-import com.yuntian.architecture.redis.config.RedisManage;
-import com.yuntian.sys.SysApplication;
+package com.yuntian.sysw;
 
+import com.yuntian.architecture.redis.config.RedisManage;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

@@ -1,5 +1,6 @@
+package com.yuntian.sysw;
+
 import com.alibaba.fastjson.JSON;
-import com.yuntian.sys.SysApplication;
 import com.yuntian.sys.service.DictService;
 import com.yuntian.sys.service.impl.CacheService;
 

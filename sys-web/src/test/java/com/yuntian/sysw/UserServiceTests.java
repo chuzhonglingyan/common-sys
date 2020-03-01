@@ -1,4 +1,5 @@
-import com.yuntian.sys.SysApplication;
+package com.yuntian.sysw;
+
 
 import org.springframework.boot.test.context.SpringBootTest;
 

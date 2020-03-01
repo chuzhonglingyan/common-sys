@@ -9,3 +9,21 @@ logging:
     root: info
   file:
     name: logfile/sys-web.log
+
+
+# 文件存储路径
+file:
+  fileAbsolutePath:  F:/IT/file-server/file/
+  picAbsolutePath: F:/IT/file-server/pic/
+  fileRelativePath: /file
+  picRelativePath: /pic
+  # 文件大小 /M
+  maxSize: 100
+  picMaxSize: 10
+
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB

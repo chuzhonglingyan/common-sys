@@ -29,31 +29,40 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
-
-        <!-- 数据源 -->
-        <dependency>
-            <groupId>com.yuntian.architecture</groupId>
-            <artifactId>common-data</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
         <dependency>
             <groupId>com.yuntian</groupId>
             <artifactId>common-system-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+
+        <!-- 数据源 -->
+        <dependency>
+            <groupId>com.yuntian.architecture</groupId>
+            <artifactId>common-datasource</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.yuntian.architecture</groupId>
+            <artifactId>common-data</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
+        <!--  Redis依赖 -->
         <dependency>
             <groupId>com.yuntian.architecture</groupId>
             <artifactId>common-redis</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-
-        <!-- 缓存依赖 -->
+        <!--  日志收集 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
+            <groupId>com.yuntian.architecture</groupId>
+            <artifactId>common-log</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
 

@@ -64,35 +64,6 @@
         </dependency>
 
 
-        <!-- 数据源 -->
-        <dependency>
-            <groupId>com.yuntian.architecture</groupId>
-            <artifactId>common-datasource</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.yuntian.architecture</groupId>
-            <artifactId>common-data</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-
-        <!--  Redis依赖 -->
-        <dependency>
-            <groupId>com.yuntian.architecture</groupId>
-            <artifactId>common-redis</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <!--  日志收集 -->
-        <dependency>
-            <groupId>com.yuntian.architecture</groupId>
-            <artifactId>common-log</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
     </dependencies>
 
     <build>
