@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
  * @Date: 2019/12/25 0025 00:25
  * @Description:
  */
-@SpringBootTest(classes = SysApplication.class)
+@SpringBootTest(classes = SysWApplication.class)
 @Slf4j
 public class TestRedis {
 

@@ -1,12 +1,11 @@
 package com.yuntian.sys.model.vo;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.yuntian.architecture.util.BeanCopyUtil;
+import com.yuntian.util.BeanCopyUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
-
 import lombok.Data;
 
 

@@ -1,4 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.yuntian.sys.config.SysConfig,\
-com.yuntian.sys.config.MySysbatisConfig,\
-com.yuntian.sys.config.WebMvcConfigurerAdapter

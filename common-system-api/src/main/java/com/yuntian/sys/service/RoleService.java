@@ -43,7 +43,7 @@ public interface RoleService extends IBaseService<Role> {
     List<Role> getRoleByKey(String roleKey);
 
 
-    RoleVO  getInfo(Long id);
+    RoleVO getInfo(Long id);
 
 
 }

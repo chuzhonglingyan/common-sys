@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
 import com.yuntian.sys.model.entity.Menu;
 
 @EqualsAndHashCode(callSuper = true)

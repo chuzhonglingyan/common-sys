@@ -5,9 +5,33 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+
     <groupId>com.yuntian</groupId>
     <artifactId>common-system-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
+    <name>common-system-api</name>
+    <packaging>jar</packaging>
+
+    <properties >
+        <hibernate-validator.version>6.0.18.Final</hibernate-validator.version>
+    </properties>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>com.yuntian.architecture</groupId>
+            <artifactId>common-data</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate-validator.version}</version>
+        </dependency>
+
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -20,22 +44,5 @@
             </plugin>
         </plugins>
     </build>
-    <name>common-system-api</name>
-    <packaging>jar</packaging>
 
-    <properties >
-        <hibernate-validator.version>6.0.18.Final</hibernate-validator.version>
-    </properties>
-    <dependencies>
-        <dependency>
-            <groupId>com.yuntian.architecture</groupId>
-            <artifactId>common-data</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>${hibernate-validator.version}</version>
-        </dependency>
-    </dependencies>
 </project>

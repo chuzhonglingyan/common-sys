@@ -7,9 +7,9 @@ import com.yuntian.sys.model.dto.OperatorQueryDTO;
 import com.yuntian.sys.model.dto.OperatorSaveDTO;
 import com.yuntian.sys.model.dto.OperatorUpdateDTO;
 import com.yuntian.sys.model.dto.RegisterDTO;
-import com.yuntian.sys.model.entity.Operator;
 import com.yuntian.sys.model.vo.OperatorVO;
 import com.yuntian.sys.model.vo.PageVO;
+import com.yuntian.sys.model.entity.Operator;
 
 import java.util.List;
 import java.util.Map;

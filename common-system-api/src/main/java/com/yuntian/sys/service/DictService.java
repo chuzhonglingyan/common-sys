@@ -4,10 +4,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuntian.architecture.data.IBaseService;
 import com.yuntian.sys.model.dto.DictQueryDTO;
 import com.yuntian.sys.model.entity.Dict;
-import com.yuntian.sys.model.entity.Menu;
 import com.yuntian.sys.model.vo.DictVO;
 
-import java.util.Collection;
 import java.util.List;
 
 /**

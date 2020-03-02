@@ -1,7 +1,7 @@
 package com.yuntian.sys.model.dto;
 
 import com.yuntian.architecture.data.BaseDTO;
-import com.yuntian.sys.valid.SwitchConstraint;
+import com.yuntian.valid.SwitchConstraint;
 
 import org.hibernate.validator.constraints.Length;
 
