@@ -10,10 +10,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>common-tools</artifactId>
+    <artifactId>common-tools-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>common-tools</name>
-    <description>common-tools</description>
+    <name>common-tools-service</name>
+    <description>common-tools-service</description>
 
     <properties>
         <java.version>1.8</java.version>
