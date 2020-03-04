@@ -2,6 +2,7 @@ package com.yuntian.sys.model.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.yuntian.architecture.data.BaseEntity;
+import com.yuntian.architecture.data.BaseTreeEntity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,24 +20,15 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @TableName("sys_menu")
-public class Menu extends BaseEntity {
+public class Menu extends BaseTreeEntity {
 
 
     private static final long serialVersionUID = -4651342345937174534L;
-    /**
-    * 父菜单id
-    */
-    private Long pid;
 
     /**
     * 菜单名称
     */
     private String name;
-
-    /**
-    * 菜单等级 1一级菜单  2 二级菜单  3 三级菜单
-    */
-    private Integer level;
 
     /**
     * 菜单路径
@@ -63,12 +55,6 @@ public class Menu extends BaseEntity {
      * 0：隐藏  1：可见
      */
     private Integer visible;
-
-    /**
-    * 排序
-    */
-    private Integer sort;
-
 
     private String component;
 

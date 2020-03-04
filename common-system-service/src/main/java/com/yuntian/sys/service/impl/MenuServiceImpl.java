@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuntian.architecture.data.BaseServiceImpl;
 import com.yuntian.architecture.data.exception.BusinessException;
 import com.yuntian.architecture.data.util.AssertUtil;
+import com.yuntian.architecture.data.util.TreeUtil;
 import com.yuntian.architecture.util.BeanCopyUtil;
 import com.yuntian.constant.SysConstants;
 import com.yuntian.sys.enums.EnabledEnum;
@@ -25,7 +26,7 @@ import com.yuntian.sys.model.vo.PageVO;
 import com.yuntian.sys.service.MenuService;
 import com.yuntian.sys.service.OperatorRoleService;
 import com.yuntian.sys.service.RoleMenuService;
-import com.yuntian.util.TreeUtil;
+import com.yuntian.util.ComponentUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -254,7 +255,7 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
     public PageVO<MenuTreeVO> getMenuTreeVoList(MenuQueryDTO dto) {
         List<Menu> menuList = list();
         PageVO<MenuTreeVO> pageVO = new PageVO<>();
-        pageVO.setRecords(TreeUtil.buildMenuTree(menuList));
+        pageVO.setRecords(TreeUtil.buildTree(menuList,MenuTreeVO.class));
         pageVO.setTotal((long) pageVO.getRecords().size());
         return pageVO;
     }
@@ -262,13 +263,13 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
     @Override
     public List<MenuTreeLabelVO> getEnabledMenuTreeList() {
         List<Menu> menuList = getEnableMenuList();
-        return TreeUtil.buildMenuLableTree(menuList);
+        return TreeUtil.buildTree(menuList,MenuTreeLabelVO.class);
     }
 
     @Override
     public List<MenuTreeLabelVO> getdMenuTreeList() {
         List<Menu> menuList = list();
-        return TreeUtil.buildMenuLableTree(menuList);
+        return TreeUtil.buildTree(menuList,MenuTreeLabelVO.class);
     }
 
 
@@ -278,7 +279,7 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
         if (CollectionUtils.isEmpty(menuList)) {
             return new ArrayList<>();
         }
-        return TreeUtil.getMenuTreeVolist(menuList);
+        return TreeUtil.buildTree(menuList,MenuTreeVO.class);
     }
 
     @Override
@@ -288,8 +289,8 @@ public class MenuServiceImpl extends BaseServiceImpl<MenuMapper, Menu> implement
         if (CollectionUtils.isEmpty(menuList)) {
             return new ArrayList<>();
         }
-        List<MenuTreeVO> menuTreeVoList = TreeUtil.buildMenuTree(menuList);
-        return TreeUtil.buildMenuComponents(menuTreeVoList);
+        List<MenuTreeVO> menuTreeVoList = TreeUtil.buildTree(menuList,MenuTreeVO.class);
+        return ComponentUtils.buildMenuComponents(menuTreeVoList);
     }
 
 

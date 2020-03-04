@@ -1,6 +1,8 @@
 package com.yuntian.sys.model.vo;
 
 
+import com.yuntian.architecture.data.ITree;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -12,7 +14,7 @@ import lombok.Data;
  * @Description:
  */
 @Data
-public class MenuTreeLabelVO implements Serializable {
+public class MenuTreeLabelVO implements Serializable,ITree<MenuTreeLabelVO> {
 
     private static final long serialVersionUID = 4656867807762635040L;
 
