@@ -1,5 +1,7 @@
 package com.yuntian.cache;
 
+import org.apache.commons.codec.binary.Hex;
+
 import java.util.StringJoiner;
 
 /**
@@ -34,7 +36,7 @@ public class SysRedisKey {
         StringJoiner stringJoiner = new StringJoiner("_", "", "");
         stringJoiner.add(token);
         stringJoiner.add(ip);
-        return String.format(BACKEND_USER_PREFIX, Integer.toHexString(stringJoiner.hashCode()));
+        return String.format(BACKEND_USER_PREFIX, Hex.encodeHexString(stringJoiner.toString().getBytes()));
     }
 
 }

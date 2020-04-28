@@ -1,4 +1,4 @@
-package com.yuntian.sysw;
+package com.test.sysw;
 
 import com.yuntian.architecture.redis.config.RedisManage;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.yuntian.sysw;
+package com.test.sysw;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
